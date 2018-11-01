@@ -33,7 +33,7 @@ end_free记录其大小，用于保存未被挂在自由链表的区块，它和
 3.3 traits编程技法：偏特化
 
 四、序列式容器
-4.1 vector
+4.1 vector（连续的线性空间，支持快速随机访问）
 vector实现源码：
 template <class T, class Alloc = alloc>
 class vector
@@ -112,3 +112,38 @@ public:
 	void resize(size_type new_size) { resize(new_size, T()); }
 	void clear() { erase(begin(), end()); }
 };
+
+4.2 list（环型双向链表，支持快速增删）
+	push_front,push_back,erase,pop_front,pop_back,clear,remove,unique,merge,reverse,sort
+4.3 deque（一个中央控制器和多个缓冲区，支持收尾快速增删，也支持随机访问）
+4.4 stack（deque或list实现）
+	先进后出，stack没有迭代器，只有顶端元素才能被外界取出，不提供走访功能。
+4.5 queue（deque或list实现）
+	先进先出，queue没有迭代器，只有顶端元素才能被外界取出，不提供走访功能。
+4.6 heap（堆，最小堆，最大堆）
+	堆是一颗完全二叉树（对于一个树高为h的二叉树，如果其第0层至第h-1层的节点都满。如果最下面一层节点不满，则所有的节点在左边的连续排列，空位都在右边。这样的二叉树就是一棵完全二叉树），
+	将堆存放在vector（array）中，技巧：将 array 的 #0 元素保留（或设为无限大值或无限小值），那么当 complete binary tree ㆗的某个节点位于 array 的 i 处，其左子节点必位于 array 的 2i 处，
+	其右子节点必位于 array 的2i+1 处，其父节点必位于「 i/2 」处（此处的「」权且代表高斯符号，取其整数）。通过这么简单的位置规则， array 可以轻易实作出 complete binary tree
+	最大堆:
+	push_heap算法：入堆，首先push到end()，然后与父节点比较，不满足则交换父子节点，不断往上，直到其没有父节点或满足条件。
+	pop_headp算法：出堆，首先pop()，取走根节点，用最后一个节点填补，然后与2个子节点比较，并与较大的子节点交换位置，直到没有子节点或满足条件。
+	sort_heap算法：堆排序，不断地对heap做pop动作，便可达到排序效果。
+4.7 priority_queue（带权值的队列）
+	利用heap实现，每次弹出的都是权值最高的。
+4.8 slist（双迭代器，list只有单向迭代器）
+4.9 总结
+	vector      底层数据结构为数组 ，支持快速随机访问
+	list            底层数据结构为双向链表，支持快速增删
+	deque       底层数据结构为一个中央控制器和多个缓冲区，支持首尾（中间不能）快速增删，也支持随机访问
+	stack        底层一般用list或deque实现，封闭头部即可，不用vector的原因应该是容量大小有限制，扩容耗时
+	queue     底层一般用list或deque实现，封闭头部即可，不用vector的原因应该是容量大小有限制，扩容耗时
+	（stack和queue其实是适配器,而不叫容器，因为是对容器的再封装）
+	priority_queue     的底层数据结构一般为vector为底层容器，堆heap为处理规则来管理底层容器实现
+	set                   底层数据结构为红黑树，有序，不重复
+	multiset         底层数据结构为红黑树，有序，可重复 
+	map                底层数据结构为红黑树，有序，不重复
+	multimap    底层数据结构为红黑树，有序，可重复
+	hash_set     底层数据结构为hash表，无序，不重复
+	hash_multiset 底层数据结构为hash表，无序，可重复 
+	hash_map    底层数据结构为hash表，无序，不重复
+	hash_multimap 底层数据结构为hash表，无序，可重复 
