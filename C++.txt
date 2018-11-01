@@ -1,0 +1,143 @@
+1.strcpy函数的编写？（memcpy函数的编写）(考点：内存重叠的情况)
+	#include <assert.h>
+	char * strcpy(char* dest,const char* source)
+	{
+		assert(dest != NULL && source != NULL);
+		if(NULL == dest || NULL == source)
+		{
+			return NULL;
+		}
+		char * p = dest;
+		size_t len = strlen(source);
+		if(dest >= src && dest <= source + len)
+		{
+			p = p + len - 1;
+			source = source + len - 1;
+			for(size_t i = 0; i < strlen(source); i++)
+			{
+				*p-- = *source--;
+			}
+		}
+		else
+		{
+			while(source != '\0')
+			{
+				*p++ = *source++;
+			}
+		}
+		return dest;
+	}
+	
+	//防止内存重叠需要从后往前复制
+	void* memcpy(void* dest,const void* source,size_t count)
+	{
+		char *dp = (char*)dest;
+		char *sp = (char*)source;
+		if(NULL == dest || NULL == source)
+		{
+			return NULL;
+		}
+		if(dest > source && dest < source + count) //从后往前复制
+		{
+			dp = dp + count - 1;
+			sp = sp + count - 1;
+			while(count--)
+			{
+				*dp-- = *sp--;
+			}
+		}
+		else
+		{
+			for(size_t i = 0; i < count ; i++)
+			{
+				*dp++ = *sp++;
+			}
+		}
+		return dest;
+	}
+2.c++中四种类型转换机制
+	例子：A是AA的基类
+	static_cast<type>()： 1）完成基础数据类型，2）同一个继承体系中类型的转换 3）任意类型与空指针类型void*之间的转换。
+		A a = static_cast<A>(aa);	//编译通过，子类对象可以变成父类对象，但是内存会被剪切
+		AA aa = static_cast<AA>(a);	//编译不过,父类对象不能变成子类对象
+		AA *paa = static_cast<A*>(paa);	//编译通过，父类指针指向子类对象，正常的多态
+		AA *paa = static_cast<AA*>(pa);	//编译通过，子类指针指向了父类对象，访问子类成员时不可预料
+	dynamic_cast<type>()：主要用在继承体系中的安全向下转型。它能安全地将指向基类的指针转型为指向子类的指针或引用，并获知转型动作成功是否。转型失败会返回null（转型对象为指针时）或抛出异常（转型对象为引用时）。 只有在基类带有虚函数的情况下才允许将基类转换为子类
+		（dynamic_cast类型必须是指针或者引用）
+		AA* paa = dynamic_cast<AA*>(pa);	//编译通过，但是返回NULL，子类指针指向父类对象
+		A* pa = dynamic_cast<A*>(paa);		//编译通过，且转换成功
+		A& pa = dynamic_cast<A&>(*paa);		//编译通过，子类对象引用指向父类对象，数据会被截取
+		AA& paa = dynamic_cast<AA&>(*pa);	//编译通过，但是引发了异常（所谓的安全转型）
+	const_cast<type>()：增加或删除const属性。（const_cast类型必须是指针或者引用）
+		const A *pa = new A();
+		A& a = const_cast<A&>(*pa);
+		a.a = 2;						//编译通过，可通过A来修改
+	reinterpret_cast<type>()
+3.继承机制中对象之间是如何转换的
+4.继承机制中，引用和指针之间是如何转换的
+	基类——>派生类：用dynamic_cast转换，首先检查基类指针（引用）是否真正指向一个派生类对象，然后再做相应处理，对指针进行dynamic_cast，成功返回派生类对象，失败返回空指针，对引用进行dynamic_cast，成功返回派生类对象，失败抛出一个异常。 
+	派生类——>基类：可以用dynamic_cast或者直接进行类型转换（直接赋值）。
+5.虚函数，虚函数表里面内存如何分配的
+	
+6.STL中迭代器的作用，有指针为何还要迭代器
+7.STL中map与unordered_map
+8.inline有什么用，STL用的多吗？
+9.vector扩容，map用的什么实现？
+10.段内存管理
+11.static用法
+12.congst用法
+13.多态，虚函数，虚函数表，重写和重载区别
+14.TCP UDP区别
+15.c++11一些特性
+16.手写C++实现一个STL里面的功能
+17.vital关键字
+18.为什么要用虚析构函数，什么是多态
+19.const vector<int> 和vector <const int>的区别
+20.new,delete和malloc，free的区别
+21.struct和union的区别，struct如果里面存了double，int，short请问这个struct有几个字节，怎么存储的
+22.C++相比C有哪三大特性？（多态，继承，封装）说说多态怎么实现的？什么时候需要用到虚析构函数？
+23.如何禁止自动生成拷贝构造函数？
+24.虚函数的内存结构，那菱形继承的虚函数内存结构呢
+25.基类的析构函数为什么需要是虚函数
+	答：new出来的是子类son的对象，采用一个父类father的指针来接收，故在析构的时候，编译器因为只知道这个指针是父类的，
+	所以只将父类部分的内存析构了，而不会去析构子类的内存，就造成了内存泄露。基类析构函数定义为虚拟函数的时候，在子
+	类的对象的首地址开始会有一块基类的虚函数表拷贝，在析构子类对象的时候会删除此虚函数表，此时会调用基类的析构函数，
+	所以此时内存是安全的。
+26.构造函数可以是虚函数吗？（编译不通过）
+	答：虚函数的执行依赖于虚函数表。而虚函数表在构造函数中进行初始化工作，即初始化vptr，让他指向正确的虚函数表。
+	而在构造对象期间，虚函数表还没有被初始化，将无法进行。
+27.成员函数可以调用delete this吗？为什么？
+28.四种类型转换？static_cast向上向下转换时的会出现什么问题。dynamic_cast失败的话会怎样。
+29.为何static成员函数不能为virtual？（编译不通过）
+	答：虚函数依靠vptr和vtable来处理。vptr是一个指针，在类的构造函数中创建生成，并且只能用this指针来访问它，因为它是
+	类的一个成员，并且vptr指向保存虚函数地址的vtable.对于静态成员函数，它没有this指针，所以无法访问vptr. 这就是为何
+	static函数不能为virtual.
+	虚函数的调用关系：this -> vptr -> vtable ->virtual function
+30.内联函数可以是虚函数吗？（编译能通过）
+	答：inline是在编译器将函数类容替换到函数调用处，是静态编译的。而虚函数是动态调用的，在编译器并不知道需要调用的是
+	父类还是子类的虚函数，所以不能够inline声明展开，所以编译器会忽略。
+31.正确区分重载、重写和隐藏
+	答：注意三个概念的适用范围：处在同一个类中的函数才会出现重载。处在父类和子类中的函数才会出现重写和隐藏。
+	重载：同一类中，函数名相同，但参数列表不同。
+	重写：父子类中，函数名相同，参数列表相同，且有virtual修饰。
+	隐藏：父子类中，函数名相同，参数列表相同，但没有virtual修饰；函数名相同，参数列表不同，无论有无virtual修饰都是隐藏。
+32.如何定义一个只能在栈上或者堆上生成对象的类？
+33.sizeof(类)，如何计算类的大小？
+34.sizeof(结构体)，如何计算结构体的大小？
+35.结构体和类有什么区别？
+36.extern“C”有什么作用？原理是什么？
+37.const修饰的变量和#define有什么区别？
+38.static有什么作用？如何改变变量的生命周期和作用域？
+39.volitale什么作用？
+40.new 和malloc有什么不一样？
+41.指针和引用的区别？
+42.STL容器有哪些？
+43.vector内部数据结构是什？List/Map/Queue
+44.STL，vector和List有什么不一样？map是用什么数据结构实现的？
+45.面向对象有哪些特点？如何体现？
+46.面向对象的设计原则有哪些？
+47.如何检查内存泄漏？
+48.从源代码到可执行二进制文件，要经过哪些过程？
+49.C++中不能重载的运算符：“?:”、“.”、“::”、“sizeof”和”.*”
+50.各个容器的内部实现数据结构
+51.什么情况会导致栈溢出，内存泄漏
