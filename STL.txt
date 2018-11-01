@@ -1,0 +1,114 @@
+一、STL六大组件
+STL提供六大组件，彼此可以组合套用：
+1.容器（containers）：各种数据结构，如vector,list,deque,set,map
+2.算法（algorithms）：各种常用算法，如sort,search,copy,erase
+3.迭代器（iterators）：扮演着容器与算法之间的粘合剂，本质是一个class template,所有STL容器都附带自己专属的迭代器
+4.仿函式（functors）：重载了operator()的class或class template
+5.配接器（adapters）：用来修饰容器、仿函数或迭代器接口的东西。
+6.配置器（allocators）：负责空间配置和管理，实现了一个动态空间配置、空间管理、空间释放的class template。
+六大组件的关系：container透过allocators取得数据存储空间，Algorithm透过iterator存取container内容，functor协助algorithm完成不同的策略变化，adapter修饰functor
+
+二、空间配置器（单例模式，一个程序只需要一个空间配置器）
+每个容器都已经预定其预设的空间配置器，如：
+template <class T, class Alloc = alloc>
+class vector {};
+内存分配规则：
+如果用户需要的区块大于128，则直接调用第一级空间配置器（直接malloc()和free()）
+如果用户需要的区块大于128，则到自由链表中去找 （启用二级空间配置器）
+	如果用户需要是一块n字节的区块，且n <= 128（调用第二级配置器），此时Refill填充是这样的：（需要注意的是：系统会自动将n字节扩展到8的倍数也就是RoundUP（n），
+	再将RoundUP（n）传给Refill）。用户需要1块n大小的内存，且自由链表中没有，因此系统会向内存池申请nobjs * n大小的内存块，默认nobjs=20
+		如果内存池大于 nobjs * n，那么直接从内存池中取出，1块给用户，19块给free_list
+		如果内存池小于nobjs * n，但是比一块大小n要大，那么此时1块给用户，其他的块数给自由链表。
+		如果内存池连一个区块的大小n都无法提供，那么首先先将内存池残余的零头给挂在自由链表上，然后向系统heap申请(40倍大小的客户需求的满8倍数)空间，1个给用户，19个给free_list，20个留在内存池，申请成功则返回，
+			申请失败则到自己的自由链表中看看还有没有可用区块返回，如果连自由链表都没了最后会调用一级配置器。
+
+自由链表是一个指针数组，有点类似与hash桶，它的数组大小为16，每个数组元素代表所挂的区块大小，比如free_list[0]代表下面挂的是8bytes的区块，free_list[1]代表
+下面挂的是16bytes的区块…….依次类推，直到free _ list[15]代表下面挂的是128bytes的区块同时我们还有一个被称为内存池地方，以start_free和
+end_free记录其大小，用于保存未被挂在自由链表的区块，它和自由链表构成了伙伴系统。
+
+三、迭代器概念与traits编程技法
+3.1 迭代器思维
+	迭代器是将容器（数据结构）和算法的粘合剂。
+3.2 迭代器是一种smart pointer
+3.3 traits编程技法：偏特化
+
+四、序列式容器
+4.1 vector
+vector实现源码：
+template <class T, class Alloc = alloc>
+class vector
+{
+public:
+	typedef T	value_type;
+	typedef value_type* pointer;
+	typedef value_type*	iterator;
+	typedef value_type& reference;
+	typedef size_t size_type;
+	typedef ptrdiff_t difference_type;
+protected:
+	iterator start;
+	iterator finish;
+	iterator end_of_storage;
+	
+	void insert_aux(iterator position, const T& x);
+	void deallocate(){
+		if(start){
+			data_allocator::deallocate(start, end_of_storage - start);
+		}
+	}
+	void fill_initialize(size_type n, const T& value) {
+		start = allocate_and_fill(n, value);
+		finish = start + n;
+		end_of_storage = finish;
+	}
+public:
+	iterator begin() {return start;}
+	iterator end() {return finish;}
+	size_type size() const {return size_type(end() - begin());}
+	size_type capacity() const{ return size_type(end_of_storage - begin()); }
+	bool empty() const {return begin() == end();}
+	reference operator[](size_type n){ return *(begin() + n); }
+	
+	vector() : start(0),finish(0),end_of_storage(0){}
+	vector(size_type n, const T& value) { fill_initialize(n, value); }
+	vector(int n, const T& value) { fill_initialize(n, value); }
+	vector(long n, const T& value) { fill_initialize(n, value); }
+	explicit vector(size_type n) { fill_initialize(n, T()); }
+	
+	~vector()
+	{
+		destory(start,finish);
+		deallocate();
+	}
+	reference front(){return *begin();}
+	reference back(){return *(end() - 1)}
+	void push_back(const T& x)
+	{
+		if(finish != end_of_storage){
+			construct(finish,x);
+			++finish;
+		}
+		else{
+			insert_aux(end(),x);
+		}
+	}
+	void pop_back(){
+		--finish;
+		destory(finish);
+	}
+	iterator erase(iterator position) {
+		if (position + 1 != end())
+			copy(position + 1, finish, position);
+		--finish;
+		destroy(finish);  // 全域函式，见 2.2.3 节。
+		return position;
+	}
+	void resize(size_type new_size, const T& x) {
+		if (new_size < size())
+		erase(begin() + new_size, end());
+	else
+		insert(end(), new_size - size(), x);
+	}
+	void resize(size_type new_size) { resize(new_size, T()); }
+	void clear() { erase(begin(), end()); }
+};
