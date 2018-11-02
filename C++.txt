@@ -58,16 +58,16 @@
 2.c++中四种类型转换机制
 	例子：A是AA的基类
 	static_cast<type>()： 1）完成基础数据类型，2）同一个继承体系中类型的转换 3）任意类型与空指针类型void*之间的转换。
-		A a = static_cast<A>(aa);	//编译通过，子类对象可以变成父类对象，但是内存会被剪切
-		AA aa = static_cast<AA>(a);	//编译不过,父类对象不能变成子类对象
-		AA *paa = static_cast<A*>(paa);	//编译通过，父类指针指向子类对象，正常的多态
-		AA *paa = static_cast<AA*>(pa);	//编译通过，子类指针指向了父类对象，访问子类成员时不可预料
+		向上转型A a = static_cast<A>(aa);	//编译通过，子类对象可以变成父类对象，但是内存会被剪切
+		向下转型AA aa = static_cast<AA>(a);	//编译不过,父类对象不能变成子类对象
+		向上转型A *pa = static_cast<A*>(paa);	//编译通过，父类指针指向子类对象，正常的多态
+		向下转型AA *paa = static_cast<AA*>(pa);	//编译通过，子类指针指向了父类对象，访问子类成员时不可预料
 	dynamic_cast<type>()：主要用在继承体系中的安全向下转型。它能安全地将指向基类的指针转型为指向子类的指针或引用，并获知转型动作成功是否。转型失败会返回null（转型对象为指针时）或抛出异常（转型对象为引用时）。 只有在基类带有虚函数的情况下才允许将基类转换为子类
 		（dynamic_cast类型必须是指针或者引用）
-		AA* paa = dynamic_cast<AA*>(pa);	//编译通过，但是返回NULL，子类指针指向父类对象
-		A* pa = dynamic_cast<A*>(paa);		//编译通过，且转换成功
-		A& pa = dynamic_cast<A&>(*paa);		//编译通过，子类对象引用指向父类对象，数据会被截取
-		AA& paa = dynamic_cast<AA&>(*pa);	//编译通过，但是引发了异常（所谓的安全转型）
+		向上转型AA* paa = dynamic_cast<AA*>(pa);	//编译通过，但是返回NULL，子类指针指向父类对象
+		向下转型A* pa = dynamic_cast<A*>(paa);		//编译通过，且转换成功
+		向下转型A& pa = dynamic_cast<A&>(*paa);		//编译通过，子类对象引用指向父类对象，数据会被截取
+		向上转型AA& paa = dynamic_cast<AA&>(*pa);	//编译通过，但是引发了异常（所谓的安全转型）
 	const_cast<type>()：增加或删除const属性。（const_cast类型必须是指针或者引用）
 		const A *pa = new A();
 		A& a = const_cast<A&>(*pa);
@@ -104,22 +104,207 @@
 					const成员函数不能调用非const成员函数
 	4.修饰函数返回值：返回值也必须赋给const data,non-const pointer
 13.多态，虚函数，虚函数表，重写和重载区别
-	多态：通过继承同一个基类，产生了相关的不同的派生类，与基类中同名的成员函数在不同的派生类中会有不同的实现，也就是说：一个接口、多种方法。
+	多态：编译器多态（模板），运行时多态（基类和派生类）
+		通过继承同一个基类，产生了相关的不同的派生类，与基类中同名的成员函数在不同的派生类中会有不同的实现，也就是说：一个接口、多种方法。
 	虚函数：虚函数的作用是允许在派生类中重新定义与基类同名的函数，并且可以通过基类指针或引用来访问基类和派生类中的同名函数。
 	虚函数表：用来访问虚函数，虚函数是存放在虚函数表中的。
 	重载：是指同一可访问区内被声明的几个具有不同参数列（参数的类型，个数，顺序不同）的同名函数，根据参数列表确定调用哪个函数，重载不关心函数返回类型。
 	隐藏：是指派生类的函数屏蔽了与其同名的基类函数，注意只要同名函数，不管参数列表是否相同，基类函数都会被隐藏。
 	重写(覆盖)：是指派生类中存在重新定义的函数。其函数名，参数列表，返回值类型，所有都必须同基类中被重写的函数一致。只有函数体不同（花括号内），派生类调用时会调用派生类的重写函数，不会调用被重写函数。重写的基类中被重写的函数必须有virtual修饰。
 15.c++11一些特性
+	1.统一的初始化：C++11支持对于所有的内置类型和用户定义类型使用大括号方式的初始化列表，使用初始化列表时，可以添加等号，也可以没有。
+	2.智能指针：C++11中的智能指针包括三种：std::unique_ptr、std::shared_ptr和std::weak_ptr。 这三种智能指针都是模板类，每个实例化的智能指针对象都是一个用于管理裸指针的栈对象，
+		通过栈对象的自动释放，实现对上资源的自动释放，有效防止内存泄露。
+	3.Lambda函数：实际上是一个闭包（closure），类似于一个匿名的函数，拥有捕获所在作用域中变量的能力，能够将函数做为对象一样使用，通常用来实现回调函数、代理等功能。Lambda表达式是函数式编程的基础。
+		// Lambda表达式
+		auto lambda = [](int a)->int{ return a; };	//例子1
+		sort(words.begin(),word2.end(),[](cosnt string& a,const string& b){
+			return a.size()<b.size();
+		});						//例子2
+	4.包装器std::function,std::function是对C++中各种可调用实体（普通函数、Lambda表达式、函数指针、以及其它函数对象等）的一个统一封装，形成一个新的统一可调用对象（std::function对象）（主要是对模板化编程很有意义）。
+		例子
+#include <functional>
+#include <iostream>
+using namespace std;
+
+std::function< int(int)> Functional;	//包装器
+
+// 普通函数
+int TestFunc(int a)
+{
+    return a;
+}
+
+// Lambda表达式
+auto lambda = [](int a)->int{ return a; };
+
+// 仿函数(functor)
+class Functor
+{
+public:
+    int operator()(int a)
+    {
+        return a;
+    }
+};
+
+// 1.类成员函数
+// 2.类静态函数
+class TestClass
+{
+public:
+    int ClassMember(int a) { return a; }
+    static int StaticMember(int a) { return a; }
+};
+
+int main()
+{
+    // 普通函数->包装器
+    Functional = TestFunc;
+    int result = Functional(10);
+    cout << "普通函数："<< result << endl;
+
+    // Lambda表达式->包装器
+    Functional = lambda;
+    result = Functional(20);
+    cout << "Lambda表达式："<< result << endl;
+
+    // 仿函数->包装器
+    Functor testFunctor;
+    Functional = testFunctor;
+    result = Functional(30);
+    cout << "仿函数："<< result << endl;
+
+    // 类成员函数->包装器
+    TestClass testObj;
+    Functional = std::bind(&TestClass::ClassMember, testObj, std::placeholders::_1);
+    result = Functional(40);
+    cout << "类成员函数："<< result << endl;
+
+    // 类静态函数->包装器
+    Functional = TestClass::StaticMember;
+    result = Functional(50);
+    cout << "类静态函数："<< result << endl;
+
+    return 0;
+}
 16.手写C++实现一个STL里面的功能
-17.vital关键字
-18.为什么要用虚析构函数，什么是多态
+#include<iostream>
+using namespace std;
+template<typename T>
+class Myvector
+{
+public:
+	Myvector()
+	{
+		data=NULL;
+		capacity=size=0;
+	}
+	Myvector(const Myvector& other)
+	{
+		if(this==&other)
+			return;
+		data=new T[other.size];
+		for(int i=0; i<size; i++)
+			data[i]=other[i];
+		
+		capacity=other.capacity;
+		size=other.size;	
+	}
+	T& operator[](int index)
+	{
+		if(index>=size)
+		{
+			cout<<"Overflow!"<<endl;
+		}
+		return data[index];
+	}
+	const Myvector& push_back(const T temp)
+	{
+		if(size>=capacity)
+		{
+			T* newData=new T[capacity*2+1];
+			memmove(newData,data,size*sizeof(T));
+			delete[] data;
+			data=newData;
+			capacity=capacity*2+1;
+		}
+		data[size++]=temp;
+		return *this;
+	}
+    unsigned int GetSize()
+	{
+		return size;
+	}
+	unsigned int GetCapacity()
+	{
+		return capacity;
+	}
+private:
+	T* data;
+	unsigned int capacity;
+	unsigned int size;
+};
+class T
+{
+public:
+	T(int a=0):b(a)
+	{
+	}
+ 
+	int b;
+};
+ 
+void main()
+{
+	Myvector<T> tvec;
+	tvec.push_back(T(1));
+	cout<<tvec.GetSize()<<endl;
+	cout<<tvec.GetCapacity()<<endl;
+	tvec.push_back(T(2));
+    cout<<tvec.GetSize()<<endl;
+	cout<<tvec.GetCapacity()<<endl;
+	tvec.push_back(T(3));
+	cout<<tvec.GetSize()<<endl;
+	cout<<tvec.GetCapacity()<<endl;
+	tvec.push_back(T(4));
+    cout<<tvec.GetSize()<<endl;
+	cout<<tvec.GetCapacity()<<endl;
+	tvec.push_back(T(5));
+	cout<<tvec.GetSize()<<endl;
+	cout<<tvec.GetCapacity()<<endl;
+	cout<<"输出元素："<<endl;
+	cout<<tvec[0].b<<endl;
+	cout<<tvec[1].b<<endl;
+	cout<<tvec[2].b<<endl;
+	cout<<tvec[3].b<<endl;
+	cout<<tvec[4].b<<endl;
+}
+17.构造函数和析构函数调用顺序
+	基类构造函数->子类构造函数->子类析构函数->基类析构函数
+	因为子类构造函数成员的初始化有可能需要基类的。
+18.为什么要用虚析构函数
+	如果派生类中申请了内存空间，并在其析构函数中对这些内存空间进行释放。假设基类中采用的是非虚析构函数，
+	当删除基类指针指向的派生类对象时就不会触发动态绑定，因而只会调用基类的析构函数，而不会调用派生类的析构函数。
+	那么在这种情况下，派生类中申请的空间就得不到释放从而产生内存泄漏。
 19.const vector<int> 和vector <const int>的区别
+	const在前面，修饰的是vector，vector通过取下表不能修改vector内部元素，但是通过迭代器可以。
 20.new,delete和malloc，free的区别
+	1.new和delete是C++关键字，需要编译器支持。malloc/free是库函数，需要头文件支持
+	2.new申请内存无需指定内存块大小，malloc需要指定。
+	3.分配失败，new抛异常，malloc返回NULL。
+	4.new和delete可以为自定义类型做构造和析构工作。malloc/free是库函数，不行
 21.struct和union的区别，struct如果里面存了double，int，short请问这个struct有几个字节，怎么存储的
-22.C++相比C有哪三大特性？（多态，继承，封装）说说多态怎么实现的？什么时候需要用到虚析构函数？
+	1.但在任何同一时刻， 共用体只存放一个被选中的成员， 而结构体则存放所有的成员变量。
+	2.对于共用体的不同成员赋值，将会对其他成员重写， 原来成员的值就不存在了， 而对于结构体的不同成员赋值是互不影响的。
+	3.union的大小为其内部所有变量的最大值，按照最大类型的倍数进行分配大小；结构体分配方式类似，但还跟顺序有关。
 23.如何禁止自动生成拷贝构造函数？
+	1.声明一个私有拷贝构造函数 
+	2.继承一个uncopyable类
 24.虚函数的内存结构，那菱形继承的虚函数内存结构呢
+	1. 每个类都有虚指针和虚表；
+	2. 如果不是虚继承，那么子类将父类的虚指针继承下来，并指向自身的虚表（发生在对象构造时）。有多少个虚函数，虚表里面的项就会有多少。多重继承时，可能存在多个的基类虚表与虚指针；
+	3. 如果是虚继承，那么子类会有两份虚指针，一份指向自己的虚表，另一份指向虚基表，多重继承时虚基表与虚基表指针有且只有一份。
 25.基类的析构函数为什么需要是虚函数
 	答：new出来的是子类son的对象，采用一个父类father的指针来接收，故在析构的时候，编译器因为只知道这个指针是父类的，
 	所以只将父类部分的内存析构了，而不会去析构子类的内存，就造成了内存泄露。基类析构函数定义为虚拟函数的时候，在子
@@ -129,7 +314,8 @@
 	答：虚函数的执行依赖于虚函数表。而虚函数表在构造函数中进行初始化工作，即初始化vptr，让他指向正确的虚函数表。
 	而在构造对象期间，虚函数表还没有被初始化，将无法进行。
 27.成员函数可以调用delete this吗？为什么？
-28.四种类型转换？static_cast向上向下转换时的会出现什么问题。dynamic_cast失败的话会怎样。
+	可以通过编译，如果不在delete this之后调用成员函数，那就没有任何问题，如果调用了成员函数，那就会出错，因为已经没有这个对象的成员了。
+	但是不通过new建立的对象，是可以的。
 29.为何static成员函数不能为virtual？（编译不通过）
 	答：虚函数依靠vptr和vtable来处理。vptr是一个指针，在类的构造函数中创建生成，并且只能用this指针来访问它，因为它是
 	类的一个成员，并且vptr指向保存虚函数地址的vtable.对于静态成员函数，它没有this指针，所以无法访问vptr. 这就是为何
@@ -144,22 +330,31 @@
 	重写：父子类中，函数名相同，参数列表相同，且有virtual修饰。
 	隐藏：父子类中，函数名相同，参数列表相同，但没有virtual修饰；函数名相同，参数列表不同，无论有无virtual修饰都是隐藏。
 32.如何定义一个只能在栈上或者堆上生成对象的类？
+	只能在栈上：重写一个new操作符，并定义成私有的。
+	只能在堆上：析构函数定义成私有的。
 33.sizeof(类)，如何计算类的大小？
+	1.没内容的时候是1，早期的是0，但是会与紧接在后面的内存具有相同的地址，所以编译器后来改成了1；
+	2.成员大小+虚表指针。
+	3.内存对齐。
 34.sizeof(结构体)，如何计算结构体的大小？
+	与sizeof(类)一样。
 35.结构体和类有什么区别？
 36.extern“C”有什么作用？原理是什么？
+	作用：主要是为了实现c++和c语言所写的不同模块间的互相调用而设计的
+	原理：包含c头文件时候的extern “C"关键字，如果不包含这个，在连接生成可执行文件的时候连接器会在obj文件中寻找_add_int_int，
+	当然不可能在cadd.obj文件中找到，而如果加了extern "C"关键字，展开了其实就是extern “C” int add(int a, int b)（加了花括号
+	可以将花括号中所有的声明都变为extern “C”的），说明查找add符号的时候需要按照c的生成名字方式进行查找，就是查找_add(int a, int b)。
 37.const修饰的变量和#define有什么区别？
-38.static有什么作用？如何改变变量的生命周期和作用域？
+	1.define是在预处理阶段展开，const常量是编译运行阶段使用
+	2.define没有类型，不能做类型检查，const有具体类型，编译阶段会执行类型检查
+	3.define仅仅是展开，不会分配内存，const要分配内存
 39.volitale什么作用？
-40.new 和malloc有什么不一样？
+	该关键字的作用是防止优化编译器把变量从内存装入CPU寄存器中。
+	当要求使用 volatile 声明的变量的值的时候，系统总是重新从它所在的内存读取数据，即使它前面的指令刚刚从该处读取过数据。而且读取的数据立刻被保存
 41.指针和引用的区别？
-42.STL容器有哪些？
-43.vector内部数据结构是什？List/Map/Queue
-44.STL，vector和List有什么不一样？map是用什么数据结构实现的？
 45.面向对象有哪些特点？如何体现？
 46.面向对象的设计原则有哪些？
 47.如何检查内存泄漏？
 48.从源代码到可执行二进制文件，要经过哪些过程？
 49.C++中不能重载的运算符：“?:”、“.”、“::”、“sizeof”和”.*”
-50.各个容器的内部实现数据结构
 51.什么情况会导致栈溢出，内存泄漏
