@@ -385,6 +385,46 @@ O(n^2)的排序算法：
 		return j;
 	}
 	
+	//三路快速排序
+	template<typename T>
+	void __quickSort3Ways(T arr[], int l, int r)
+	{
+		if(r - l <= 15)
+		{
+			insertionSort(arr,l,r);
+			return;
+		}
+		//partition
+		swap(arr[l],arr[rand()%(r-l+1)+l]);
+		T v = arr[l];
+		
+		int lt = l;//arr[l+1...lt] < v
+		int gt = r + 1;//arr[gt...r] > v
+		int i = l + 1;// arr[lt+1...i) == v
+		while(i < gt)
+		{
+			if(arr[i] < v)
+			{
+				swap(arr[i],arr[lt+1]);
+				lt++;
+				i++;
+			}
+			else if(arr[i] > v)
+			{
+				swap(arr[i],arr[gt-1]);
+				gt--;
+			}
+			else
+			{
+				i++;
+			}
+		}
+		swap(arr[l],arr[lt]);
+		__quickSort3Ways(arr,l,lt-1);
+		__quickSort3Ways(arr,gt,r);
+		
+	}
+	
 	快速排序局限性：
 	对于近乎有序的数组，快速排序生成的递归树平衡度很差，分成的两部分一方很小，一方很大。
 	完全有序，退化成O(n^2)
@@ -394,3 +434,83 @@ O(n^2)的排序算法：
 	优化：
 	随机化快速排序（解决近乎有序的缺陷）
 	双路快速排序（解决具有大量重复数据）
+	三路快速排序（更加快速地解决大量重复数据）
+	
+	小结：
+	归并排序和快速排序都利用了分治的思想
+	
+	归并排序和快速排序的衍生问题
+	1.归并排序求逆序对的个数
+	2.快速排序求数组第n大元素（O(2n) n + n/2 + n/4 + n/8 + ... + 1）
+	
+2.堆
+2.1 堆排序
+堆是优先队列的实现数据结构，主要操作，入队（logN），出队(logN)（取出优先级醉倒的元素）
+2.2 堆的基本实现（二叉堆Binary heap）
+条件：堆总是一颗完全二叉树（最后一层的节点必须集中在左侧）
+	  堆中某个节点的值总是不大于其父节点的值（最大堆）
+用数组来存储二叉堆（另根节点序号为1，父节点的左右节点是2n和2n+1）
+则：parent(i) = i/2;
+	left child (i) = 2*i;
+	right child (i) = 2*i + 1;
+
+代码：
+	#include <iostream>
+	#include <alogrithm>
+	#include <string>
+	#include <ctime>
+	#include <cmath>
+	#include <cassert>
+	using namespace std;
+	template<typename Item>
+	class MaxHeap
+	{
+	private:
+		Item* data;
+		int count;
+		int capacity;
+		//堆重构
+		void shiftUp(int k)
+		{
+			while( k > 1 && data[k/2] < data[k])
+			{
+				swap(data[k/2],data[k]);
+				k /= 2;
+			}
+		}
+	public:
+		MaxHeap(int capacity)
+		{
+			//从索引1开始的，所以+1
+			data = new Item[capacity + 1];
+			count = 0;
+			this->capacity = capacity;
+		}
+		int size()
+		{
+			return count;
+		}
+		bool isEmpty()
+		{
+			return count == 0; 
+		}
+		~MaxHeap()
+		{
+			delete[] data;
+		}
+		
+		void insert(Item  item)
+		{
+			assert(count + 1 <= capacity);
+			data[count+1] = item;
+			count++;
+			shiftUp(count);
+		}
+	};
+	int mian()
+	{
+		MaxHeap<int> maxheap = MaxHeap<int>(100);
+		
+		
+		return 0;
+	}
