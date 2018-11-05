@@ -241,6 +241,7 @@ O(n^2)的排序算法：
 		int i = l,j=mid + 1;
 		for(int k = l;k <= r;k++)
 		{
+			//先考虑一端已经遍历完的情况
 			if(i > mid)
 			{
 				arr[k] = aux[j-l];
@@ -251,6 +252,7 @@ O(n^2)的排序算法：
 				arr[k] = aux[i-l];
 				i++;
 			}
+			//再考虑两端都没有遍历完的情况
 			else if(aux[i-l] < aux[j-l])
 			{
 				arr[k] = aux[i-l];
@@ -268,6 +270,7 @@ O(n^2)的排序算法：
 	template<typename T> 
 	void __mergeSort(T arr[],int l,int r)
 	{
+		//递归停止条件（至少要有两个元素）
 		if(l >= r)
 			return;
 		int mid = (l + r) / 2;
@@ -282,4 +285,112 @@ O(n^2)的排序算法：
 		__mergeSort(arr,0,n-1);
 	}
 	
-	归并排序需要利用额外的辅助空间来存储。
+	归并排序需要利用额外的辅助空间来存储，利用的是分而治之，可以将N规模的问题变成logN
+	规模的问题，一个问题是N复杂度，所以归并排序是NlogN复杂度。
+	
+	归并排序优化：
+	template<typename T> 
+	void __mergeSort(T arr[],int l,int r)
+	{
+		//递归停止条件（至少要有两个元素）
+		if(l >= r)
+			return;
+		int mid = (l + r) / 2;
+		__mergeSort(arr,l,mid);
+		__mergeSort(arr,mid+1,r);
+		//如果左边最后一个比右边第一个要小，则不归并。
+		if(arr[mid] > arr[mid + 1])
+			__merge(arr,l,mid,r);
+	}
+	
+	上面介绍的都是递归，下面用迭代来实现
+	template<typename T>
+	void mergeSortBU(T arr[],int n)
+	{
+		for(int sz = 1;sz <= n;sz += sz)
+		{
+			for(int i = 0; i+sz<n;i += sz)
+			{
+				//对arr[i...i+sz-1]和arr[i+sz...i+sz+sz-1]进行归并
+				__merge(arr,i,i+sz-1,min(i+sz+sz-1,n-1));
+			}
+		}
+	}
+	
+1.4 快速排序
+	算法思想：以某个元素为基点，处理一遍后左边的数都小于该元素，右边的数都大于该元素
+	然后对左边和右边的分别进行上述过程。
+	
+	//对arr[l...r]部分进行partition操作
+	//返回p，使得arr[l...p-1] < arr[p];arr[p+1...r] > arr[p]
+	template<typename T>
+	int __partition(T arr[], int l, int r)
+	{
+		swap(arr[rand()%(r-l+1)+l]); //随机化优化
+		T v = arr[l];
+		int j = l;
+		for(int i = l + 1;i <= r; i++)
+		{
+			if(arr[i] < v)
+			{
+				swap(arr[j+1],arr[i]);
+				j++;
+			}
+		}
+		swap(arr[l],arr[j]);
+		return j;
+	}
+	
+	template<tyepname T>
+	void __quickSort(T arr[], int l, int r)
+	{
+		if(l >= r)
+		{
+			return;
+		}
+		int p = __partition(arr,l,r);
+		__quickSort(arr,l,p-1);
+		__quickSort(arr,p+1,r);
+	}
+	
+	
+	template<tyepname>
+	void quickSort(T arr[], int n)
+	{
+		srand(time(NULL));	//随机化优化
+		__quickSort(arr, 0 ,n-1);
+	}
+	
+	双路快速排序partition
+	//对arr[l...r]部分进行partition操作
+	//返回p，使得arr[l...p-1] < arr[p];arr[p+1...r] > arr[p]
+	template<typename T>
+	int __partition2(T arr[], int l, int r)
+	{
+		swap( arr[l], arr[rand()%(r-l+1)+l] );
+		T v = arr[l];
+		
+		//arr[l+1...i) <= v;arr(j...r] >= v
+		int i=l+1 , j=r;
+		while(true)
+		{
+			while(i <= r && arr[i] < v) i++;
+			while(j<=l+1 && arr[j] > v) j--;
+			if(i > j) break;
+			swap(arr[i],arr[j]);
+			i++;
+			j--;
+		}
+		swap(arr[l],arr[j]);
+		return j;
+	}
+	
+	快速排序局限性：
+	对于近乎有序的数组，快速排序生成的递归树平衡度很差，分成的两部分一方很小，一方很大。
+	完全有序，退化成O(n^2)
+	
+	对于具有大量重复数据的序列，平衡度很差，分成两部分一方很少，一方很多（因为==的数据太多了）。
+	
+	优化：
+	随机化快速排序（解决近乎有序的缺陷）
+	双路快速排序（解决具有大量重复数据）
