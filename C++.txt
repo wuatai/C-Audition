@@ -382,8 +382,52 @@ void main()
 		变量的声明类型尽量是抽象类或接口；
 		使用继承时遵循里氏替换原则。
 	5.接口隔离原则：不同的模块要通过抽象接口隔离开，而不是通过具体的类强耦合。
-46.面向对象的设计原则有哪些？
-47.如何检查内存泄漏？
+	6.组合复用原则：尽量使用对象组合，而不是继承来达到复用的目的。该原则就是在一个新的对象里面使用一些已有的对象，使之成为新对象的一部分：新的对象通过向这些对象的委派达到复用已有功能的目的。
+47.如何检查内存泄漏？（https://www.cnblogs.com/skynet/archive/2011/02/20/1959162.html）
+	内存泄漏指由于疏忽或错误造成程序未能释放已经不再使用的内存的情况。
+	VS下：
+		#define CRTDBG_MAP_ALLOC
+		#include <stdlib.h>
+		#include <crtdbg.h>
+
+		int main(void)
+		{
+		#define new  new(_CLIENT_BLOCK, __FILE__, __LINE__) //添加这一句
+			int a = 10;
+			int* leak = new int[10];
+			_CrtDumpMemoryLeaks();
+			return 0;
+		}
+	Linux下：
+		mtrace
+		#include <iostream>
+		#include <mcheck.h>
+		#include <stdlib.h>
+		using namespace std;
+		int main()
+		{
+			setenv("MALLOC_TRACE","output",1);
+			mtrace();
+			int *p1=new int;
+			int *p2=new int;
+			int *p3=(int*)malloc(sizeof(int));
+			int *p4=(int*)malloc(sizeof(int));
+
+			delete p1;
+			free(p3);
+			return 0;
+		}
 48.从源代码到可执行二进制文件，要经过哪些过程？
+	1.编译预处理（宏定义、条件编译指令#if/#endif、头文件包含指令）
+	2.编译阶段（将代码翻译成汇编代码）
+	3.优化阶段（中间代码的优化（软件优化）、针对目标代码生成的优化（硬件优化））
+	4.汇编过程（将汇编语言翻译成机器指令）
+	5.链接程序（将有关的目标文件彼此相连）
 49.C++中不能重载的运算符：“?:”、“.”、“::”、“sizeof”和”.*”
 51.什么情况会导致栈溢出，内存泄漏
+	内存溢出：程序在申请内存时，没有足够的内存空间供其使用。
+	内存泄露：是指程序在申请内存后，无法释放已申请的内存空间，占用有用内存。
+	栈溢出：栈的空间就1~2M，如果申请的空间大于容量，写入的时候就会造成栈溢出。恶意程序覆盖掉
+		有用的代码，执行恶意程序造成攻击损失。
+		可能原因：访问越界（读数组下标越界）由于分配了过大的局部变量引起。
+				  递归层次太深，导致栈保存不了，栈溢出。可能是由于循环的递归引起的。
