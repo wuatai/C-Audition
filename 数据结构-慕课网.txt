@@ -521,8 +521,200 @@ O(n^2)的排序算法：
 快速排序		 O(nlogn)				是							  O(logn)		  不稳定
 堆排序			 O(nlogn)				是							  O(1)			  不稳定
 
+稳定的排序：
+不稳定的排序：
+
 排序算法的稳定性stable（可以通过自定义比较函数，让排序算法不存在稳定性问题）
 稳定排序：对于相等的元素，在排序后，原来靠前的元素依然靠前。
 相等元素的相对位置没有发生改变。
 
 2.3 索引堆index heap
+2.4 和堆相关的问题
+	动态选择优先级最高的任务执行
+	从1000000个选出前100大的元素（Nlog(M)）
+	d叉堆
+	ShiftUp和ShiftDown中使用赋值操作替换swap操作
+	表示堆的数组从0开始索引
+	没有capacity的限制，动态的调整堆中数组的大小
+5.1 二分查找法
+	限制：对于有序数列，才能使用二分查找法
+	代码：
+	template<typename T>
+	int binarySearch(T arr[],int n,T target)
+	{
+		//在arr[l...r]之中查找target
+		int l = 0, r = n - 1;
+		while(l <= r)
+		{
+			//int mid = (l + r)/2;若l和r都是最大的int，则会产生溢出bug
+			int mid = l + (r - l)/2;
+			if(arr[mid] == target)
+				return mid;
+			if(target < arr[mid])
+				r = mid - 1;
+			else 
+				l = mid + 1;
+		}
+		return -1;
+	}
+5.2	二分搜索树
+	优势：查找表的实现--字典数据结构
+	key1	value1
+	key2	value2
+	...
+	
+			查找元素	插入元素	删除元素
+普通数组	   O(n)		   O(n)		   O(n)
+顺序数组	   O(logn)	   O(n)		   O(n)
+二分搜索树	   O(logn)	   O(n)		   O(n)
+	高效：不仅可查找数据；还可以高效地插入，删除数据-动态维护数据
+	
+	定义：二叉树（不一定是完全二叉树）
+		  每个节点的键值大于左孩子
+		  每个节点的键值小于又孩子
+		  以左右孩子为根的子树仍为二分搜索树
+		  
+代码：
+template<tyepname Key,typename Value>
+class BST
+{
+private:
+	struct Node{
+		Key key;
+		Value value;
+		Node* left;
+		Node* right;
+		
+		Node(Key key,Value value){
+			this->key = key;
+			this->value = value;
+			this->left = this->right = NULL;
+		}
+	};
+	Node *root;
+	int count;
+public:
+	BST(){
+		root = NULL;
+		count = 0;
+	}
+	~BST(){
+		// TODO: ~BST()
+		destroy(root);
+	}
+	int size(){
+		return count;
+	}
+	bool isEmpty()
+	{
+		return count == 0;
+	}
+	void insert(Key key,Value value)
+	{
+		root = insert(root,key,value);
+	}
+	bool contain(Key key)
+	{
+		return contain(root,key);
+	}
+	Value* search(Key key){
+		return search(root,key);
+	}
+	//前序遍历
+	void preOrder(){
+		preOrder(root);
+	}
+	//中序遍历
+	void inOrder(){
+		inOrder(root);
+	}
+	//后序遍历
+	void postOrder(){
+		postOrder(root);
+	}
+	//层次遍历
+	void levelOrder(){
+		queue<Node*> q;
+		q.push(root);
+		while(!q.empty()){
+			Node *node = q.front();
+			q.pop();
+			cout << node->key<<endl;
+			if(node->left)
+				q.push(node->left);
+			if(node->right)
+				q.push(node->right);
+		}
+	}
+private:
+	Node* insert(Node *node,Key key,Value value){
+		if(node == NULL)
+		{
+			count++;
+			return new Node(key,value);
+		}
+		if(key == node->key)
+			node->value = value;
+		else if(key < node->key)
+			node->left = insert(node->left,key,value);
+		else
+			node->right = insert(node->right,key,value);
+		return node;
+	}
+	bool contain(Node* node,Key key){
+		if(node == NULL)
+			return false;
+		if(key == node->key)
+			return true;
+		else if(key < node->key)
+			return contain(node->left,key);
+		else
+			return contain(node->right,key);
+	}
+	Value* search(Node* node,Key key){
+		if(node == NULL)
+			return NULL;
+		if(key == node->value)
+			return &(node->value);
+		else if(key < node->key)
+			return search(node->left,key);
+		else 
+			return search(node->right,key);
+	}
+	void preOrder(Node* node){
+		if(node != NULL){
+			cout << node->key<<endl;
+			preOrder(node->left);
+			preOrder(node->right);
+		}
+	}
+	void inOrder(Node* node){
+		if(node != NULL){
+			inOrder(node->left);
+			cout << node->key<<endl;
+			inOrder(node->right);
+		}
+	}
+	void postOrder(Node* node){
+		if(node != NULL){
+			cout << node->key<<endl;
+			postOrder(node->left);
+			postOrder(node->right);
+		}
+	}
+	void destory(Node* node){
+		if(node != null){
+			destory(node->left);
+			destory(node->right);
+			delete node;
+			count--;
+		}
+	}
+};
+5.5 二分查找树的遍历(深度优先)
+	前序遍历：中左右
+	中序遍历：左中右（会是排好序的）
+	后序遍历：左右中
+	前中后遍历命名是根据中间节点的访问顺序，先访问的就是前
+5.6 二分查找树的层次遍历（广度优先）
+	要引入队列的概念：先把根节点入队，然后出队，输出，然后将其左右子节点入队，然后出队一个数，之后循环
