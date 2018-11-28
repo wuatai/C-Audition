@@ -130,7 +130,7 @@ public:
     }
 };
 
-加1
+6.加1
 给定一个由整数组成的非空数组所表示的非负整数，在该数的基础上加一。
 输入: [4,3,2,1]
 输出: [4,3,2,2]
@@ -152,5 +152,26 @@ public:
         if(digits.front() == 0)
             digits.insert(digits.begin(),1);
         return digits;
+    }
+};
+
+7.移动零
+给定一个数组 nums，编写一个函数将所有 0 移动到数组的末尾，同时保持非零元素的相对顺序。
+class Solution {
+public:
+    void moveZeroes(vector<int>& nums) {
+        int k = 0;
+        int length = nums.size();
+        for(int i = 0;i < length; i++)
+        {
+            if(nums[i] != 0)
+            {
+                nums[k++] = nums[i];
+            }
+        }
+        while(k < length)
+        {
+            nums[k++] = 0;
+        }
     }
 };

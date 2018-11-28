@@ -1817,4 +1817,140 @@ public:
 	前提：图中不能有负权环
 	Bellman-Ford算法可以判断图中是否有负权环
 	复杂度：O(EV)
+	算法：
+		对所有的店进行V-1次松弛操作，理论上就找到了从原点到其他所有点的最短路径
+		如果好可以继续松弛，说明原图中存在负权环。
+9.5 实现Bellman-Ford算法
+	template <typename Graph, typename Weight>
+	class BellmanFord
+	{
+	private:
+		Graph &G;
+		int s;
+		Weight *distTo;
+		vector<Edge<Weight>*> from;
+		bool hasNegativeCycle;
+		
+		bool detectNegativeCycle()
+		{
+			for(int i = 0;i < G.V();i++)
+				{
+					typename Graph::adjIterator adj(G,i);
+					for(Edge<Weight>* e = adj.begin();!adj.end();e=adj.next())
+					{
+						if(!from[e->w()] || distTo[e->v()] + e->wt() < distTo[e->w()])
+						{
+							return true;
+						}
+					}
+				}
+				return false;
+		}
+	public:
+		BellmanFord(Graph &graph, int s):G(graph)
+		{
+			this->s = s;
+			distTo = new Weight[G.V()];
+			for(int i = 0; i < G.V(); i++)
+			{
+				from.push_back(NULL);
+			}
+			//BellmanFord
+			distTo[s] = Weight();
+			
+			for(int pass = 1;pass < G.V();pass++)
+			{
+				for(int i = 0;i < G.V();i++)
+				{
+					typename Graph::adjIterator adj(G,i);
+					for(Edge<Weight>* e = adj.begin();!adj.end();e=adj.next())
+					{
+						if(!from[e->w()] || distTo[e->v()] + e->wt() < distTo[e->w()])
+						{
+							distTo[e->w()] = distTo[e->v()] + e->wt();
+							from[e->w()] = e;
+						}
+					}
+				}
+			}
+			
+			hasNegativeCycle = detectNegativeCycle();
+		}
+		~BellmanFord()
+		{
+			delete[] distTo;
+		}
+		bool negativeCycle()
+		{
+			return hasNegativeCycle;
+		}
+		Weight shorttestPathTo(int w)
+		{
+			assert(w >= 0 && w < G.V());
+			assert( !hasNegativeCycle );
+			return distTo[w];
+		}
+		bool hasPathTo(int w)
+		{
+			assert(w >= 0 && w < G.V());
+			return from[w] != NULL;
+		}
+		void shorttestPath(int w, vector<Edge<Weight>> &vec)
+		{
+			assert(w >= 0 && w < G.V());
+			assert( !hasNegativeCycle );
+			stack<Edge<Weight>*> s;
+			Edge<Weight> *e = from[w];
+			while(e->v() != this->s)
+			{
+				s.push(e);
+				e = from[e->v()];
+			}
+			while(!s.empty())
+			{
+				e = s.top();
+				vec.push_back(*e);
+				s.pop();
+			}
+		}
+		
+	};
+9.6 小结：
+	dijkstra		无负权边		有无无向图均可	O(ElogV)
+	Bellman-Ford	无负权环		有向图			O(VE)
+	利用拓扑顺序	有向无环图DAG	有向图			O(V+E)
 	
+	所有对最短路径算法
+	Floyed算法（利用到了动态规划），处理无负权环的图
+	最长路径算法
+10.总结
+线性（排序）--->>>树形结构---->>>图形结构
+线性问题（排序）
+O(n^2)	选择排序	插入排序
+O(nlogn)	归并排序	快速排序 	三路快排(partition->随机化->大量重复元素)
+O(nlogn)	堆排序
+
+树形问题
+堆(Heap)	堆排序	优先队列	索引堆(Prim,Dijkstra)
+二叉查找树(Binary Search Tree)	解决查找问题
+二分查找法	动态维护：插入，删除，查找，遍历，顺序相关问题
+并查集(Union Find)	基于rank的优化->路径压缩	Kruskal
+
+图论问题
+图的表示：邻接表和邻接矩阵	有向图和无向图	有权图和无权图
+图的遍历：DFS深度优先,BFS广度优先
+			联通分量，Flood Fill，寻路
+最小生成树问题:Prim Kruskal
+最短路径问题：Dijkstra Bellman-Ford
+
+更多算法问题：
+数据结构相关
+比如：双向队列，斐波那契堆，红黑树，区间树，KD树...
+具体领域相关
+数学；数论，计算几何
+图论；网络流
+算法设计相关
+分治：归并排序；快速排序；树结构
+贪心：选择排序；堆；Kruskal;Prim;Dijkstra
+递归回溯：树的遍历；图的遍历
+动态规划：Prim;Dijkstra
