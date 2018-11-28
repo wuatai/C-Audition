@@ -1,0 +1,89 @@
+2.2	对数据规模有个概念
+	如果想在1s之内解决问题：
+	O(n^2)可以处理大约10^4
+	O(n)可以处理大约10^8
+	O(nlogn)可以处理大约10^7
+2.3 简单复杂度分析
+	O(1):常数
+	void swapTwoInts(int &a,int &b)
+	{
+		int temp = a;
+		a = b;
+		b = temp;
+	}
+	O(n):线性
+	int reverse(string &s)
+	{
+		int n = s.size();
+		for(int i = 0;i < n/2;i++)
+			swap(s[i],s[n-1-i]);
+	}
+	O(n^2)
+	void selectionSort(int arr[],int n)
+	{
+		for(int i = 0; i < n; i++)
+		{
+			int minIndex = i;
+			for(int j = i + 1; j < n; j++)
+				if(arr[j] < arr[minIndex])
+					minIndex = j;
+			swap(arr[i],arr[minIndex])
+		}
+	}
+	(n-1)+(n-2)+...+1+0 = n(n-1)/2=1/2*n^2-1/2*n=O(n^2)
+	O(logn)
+	int binarySearch(int arr[],int n,int target)
+	{
+		int l = 0; r = n - 1;
+		while( l <= r)
+		{
+			int mid = l + (r - l) / 2;
+			if(arr[mid] == target) return mid;
+			if(arr[mid] > target) r = mid - 1;
+			else l = mid + 1;
+		}
+		return -1;
+	}
+	O(nlogn)
+	void hello(int n)
+	{
+		for(int sz = 1;sz < n;sz += sz)
+			for(int i = 1;i < n;i++)
+				cout << "hello" << endl;
+	}
+	O(sqrt(n))
+	bool isPrime(int n)
+	{
+		for(int x = 2;x*x <= n;x++)
+			if(x%x == 0)
+				return false
+		return true;
+	}
+2.5	递归算法的复杂度分析
+	如果递归函数中，只进行一次递归调用，递归深度为depth;
+	在每个递归函数中，时间复杂度为T;则总体的时间复杂度为O(T*depth)
+	
+	int sum (int n)
+	{
+		assert(n >= 0);
+		if(n == 0)
+			return 0;
+		return n + sum(n - 1);
+	}
+	递归深度:n
+	时间复杂度:O(1)
+	总体时间复杂度：O(n)
+	
+	递归中进行多次递归调用，复杂度是调用次数
+	int f(int n)
+	{
+		assert(n >= 0);
+		if(n == 0)
+			return 1;
+		return f(n-1) + f(n - 1);
+	}
+	办法：画出递归树
+	则：1+2+4+8+...
+		=2^0+2^1+2^2+...+2^n
+		=2^(n-1)-1
+		=O(2^n)
