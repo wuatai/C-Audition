@@ -392,3 +392,8 @@
 	哈希表的缺点是失去了数据的顺序性
 	map和set的底层实现为平衡二叉树
 	unordered_map和unoedered_set的底层实现为哈希表
+	问题1：Valid Anagram
+	问题2：Happy Number
+	问题3：Word Pattern
+	问题4：Isomorphic Strings
+	问题5：Sort Characters By Frequency
