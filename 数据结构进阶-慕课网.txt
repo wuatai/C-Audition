@@ -87,3 +87,31 @@
 		=2^0+2^1+2^2+...+2^n
 		=2^(n-1)-1
 		=O(2^n)
+2.6 均摊时间复杂度分析：vector的resize()需要均摊到每个push_back()操作
+
+3.1	从二分查找法看如何写出正确的程序
+	***数组中的问题其实最常见***
+	排序：选择排序；插入排序；归并排序；快速排序
+	查找：二分查找
+	出具结构：栈；队列；堆
+	
+	二分查找法
+	二分查找法的思想在1946年提出，但是第一个没有bug的二分查找法在1962年出现。
+	对于有序的数列，才能使用二分查找法（排序的作用）
+	template<typename T>
+	int binarySearch(T arr[],int n,T target)
+	{
+		int l=0,r=n-1;	//要清楚l和r的实际意义，如在[l...r]的范围里寻找target
+		while( l <= r ){	//当l == r时，区间依然有元素，所以还应该查找下去
+			int mid = (l+r)/2;
+			if(arr[mid] == target)
+				return mid;
+			if(target > arr[mid])
+				l = mid + 1;	//target在[mid+1...r]中
+			else
+				r = mid - 1;	//target在[l...mid-1]中
+		}
+		return -1；
+	}
+3.2	改变变量定义，依然可以写出正确的算法
+	
