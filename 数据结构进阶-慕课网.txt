@@ -1,0 +1,399 @@
+2.2	对数据规模有个概念
+	如果想在1s之内解决问题：
+	O(n^2)可以处理大约10^4
+	O(n)可以处理大约10^8
+	O(nlogn)可以处理大约10^7
+2.3 简单复杂度分析
+	O(1):常数
+	void swapTwoInts(int &a,int &b)
+	{
+		int temp = a;
+		a = b;
+		b = temp;
+	}
+	O(n):线性
+	int reverse(string &s)
+	{
+		int n = s.size();
+		for(int i = 0;i < n/2;i++)
+			swap(s[i],s[n-1-i]);
+	}
+	O(n^2)
+	void selectionSort(int arr[],int n)
+	{
+		for(int i = 0; i < n; i++)
+		{
+			int minIndex = i;
+			for(int j = i + 1; j < n; j++)
+				if(arr[j] < arr[minIndex])
+					minIndex = j;
+			swap(arr[i],arr[minIndex])
+		}
+	}
+	(n-1)+(n-2)+...+1+0 = n(n-1)/2=1/2*n^2-1/2*n=O(n^2)
+	O(logn)
+	int binarySearch(int arr[],int n,int target)
+	{
+		int l = 0; r = n - 1;
+		while( l <= r)
+		{
+			int mid = l + (r - l) / 2;
+			if(arr[mid] == target) return mid;
+			if(arr[mid] > target) r = mid - 1;
+			else l = mid + 1;
+		}
+		return -1;
+	}
+	O(nlogn)
+	void hello(int n)
+	{
+		for(int sz = 1;sz < n;sz += sz)
+			for(int i = 1;i < n;i++)
+				cout << "hello" << endl;
+	}
+	O(sqrt(n))
+	bool isPrime(int n)
+	{
+		for(int x = 2;x*x <= n;x++)
+			if(x%x == 0)
+				return false
+		return true;
+	}
+2.5	递归算法的复杂度分析
+	如果递归函数中，只进行一次递归调用，递归深度为depth;
+	在每个递归函数中，时间复杂度为T;则总体的时间复杂度为O(T*depth)
+	
+	int sum (int n)
+	{
+		assert(n >= 0);
+		if(n == 0)
+			return 0;
+		return n + sum(n - 1);
+	}
+	递归深度:n
+	时间复杂度:O(1)
+	总体时间复杂度：O(n)
+	
+	递归中进行多次递归调用，复杂度是调用次数
+	int f(int n)
+	{
+		assert(n >= 0);
+		if(n == 0)
+			return 1;
+		return f(n-1) + f(n - 1);
+	}
+	办法：画出递归树
+	则：1+2+4+8+...
+		=2^0+2^1+2^2+...+2^n
+		=2^(n-1)-1
+		=O(2^n)
+2.6 均摊时间复杂度分析：vector的resize()需要均摊到每个push_back()操作
+
+3.1	从二分查找法看如何写出正确的程序
+	***数组中的问题其实最常见***
+	排序：选择排序；插入排序；归并排序；快速排序
+	查找：二分查找
+	出具结构：栈；队列；堆
+	
+	二分查找法
+	二分查找法的思想在1946年提出，但是第一个没有bug的二分查找法在1962年出现。
+	对于有序的数列，才能使用二分查找法（排序的作用）
+	template<typename T>
+	int binarySearch(T arr[],int n,T target)
+	{
+		int l=0,r=n-1;	//要清楚l和r的实际意义，如在[l...r]的范围里寻找target
+		while( l <= r ){	//当l == r时，区间依然有元素，所以还应该查找下去
+			int mid = (l+r)/2;	//整形溢出bug
+			int mid = l + (r-l)/2;
+			if(arr[mid] == target)
+				return mid;
+			if(target > arr[mid])
+				l = mid + 1;	//target在[mid+1...r]中
+			else
+				r = mid - 1;	//target在[l...mid-1]中
+		}
+		return -1；
+	}
+3.2	改变变量定义，依然可以写出正确的算法
+	一定要清楚变量代表什么意义。
+	1.明确变量的含义
+	2.循环不变量
+	3.小数据量调试
+	4.大数据量测试
+3.3	在leetcode上解决第一个问题Movw Zeros
+	给定一个数组nums，写一个函数，将数组中所有的0挪到数组的尾部，而维持其他所有非0元素的相对位置。
+	举例：nums=[0,1,0,3,12]，函数运行后结果为[1,3,12,0,0]
+	思路1：把非0保存出来，填在nums左端，后端补0
+	void moveZeros(vector<int>& nums)
+	{
+		时间复杂度O(n)	空间复杂度O(n)
+		vector<int> nonZeroElements;
+		for(int i = 0;i < nums.size();i++)
+			if(nums[i])
+				nonZeroElements.push_back(num[i]);
+		for(int i = 0;i < nonZeroElements.size();i++)
+			nums[i] = nonZeroElements[i];
+		for(int i = nonZeroElements.size();i<nums.size();i++)
+			nums[i] = 0;
+	}
+	思路2:2个指针，原地
+	void moveZeros(vector<int>& nums)
+	{
+		int k = 0;	//nums中，[0...k)的元素均为非0元素
+		//遍历到第i个元素后，保证[0,...k)中所有非0元素都按照顺序排列在[0...k)中
+		for(int i = 0;i < nums.size();i++)
+			if(nums[i])
+				nums[k++] = nums[i];
+		//将nums剩余位置放置为0
+		for(int i = k;i < nums.size();i++)
+			nums[i] = 0;
+	}
+	思路3：不是赋值，用交换可以避免对后序填0
+	void moveZeros(vector<int>& nums)
+	{
+		int k = 0;	//nums中，[0...k)的元素均为非0元素
+		//遍历到第i个元素后，保证[0,...i]中所有非0元素都按照顺序排列在[0...k)中,同时，[k...i]为0
+		for(int i = 0;i < nums.size();i++)
+			if(nums[i])
+				if( i != k)
+					swap(nums[k++] = nums[i]);
+				else
+					k++;
+	}
+	
+	问题2：Remove Element
+	给定一个数组nums和一个数值val，将数组中所有等于val的元素删除，并返回剩余元素个数。
+	如nums=[3,2,2,3],val=3;返回2，且nums中前两个元素为2
+	--如何定义删除？从数组中去除？还是放在数组尾部？
+	--剩余元素的排列是否要包拯元游的相对顺序？
+	--是否有空间复杂度的要求？O(1)
+	问题3:Remove Duplicated from Sorted Array
+	给定一个有序数组，对数组中的元素去重，是的原数组的每个元素只有一个。返回去重后数组的长度值
+	如nums=[1,1,2],结果颖返回2，且nums的前两个元素为[1,2]
+	--如何定义删除？从数组中去除？还是放在数组尾部？
+	--剩余元素的排列是否要包拯元游的相对顺序？
+	--是否有空间复杂度的要求？O(1)
+	问题3:Remove Duplicated from Sorted Array II
+	给定一个有序数组，对数组中的元素去重，是的原数组的每个元素只有一个。返回去重后数组的长度值
+	如nums=[1,1,1,2,2,3],结果颖返回5，且nums的前两个元素为[1,1,2,2,3]
+	--如何定义删除？从数组中去除？还是放在数组尾部？
+	--剩余元素的排列是否要包拯元游的相对顺序？
+	--是否有空间复杂度的要求？O(1)
+3.5 三路快排partition思路的应用Sort Color
+	基础算法思路的应用
+	Sort Colors
+	给定一个有n个元素的数组，数组中元素的取值只有0,1,2三种可能。为这个数组排序。
+	-可以使用任意一种排序算法
+	-没有使用上题目中给出的特殊条件
+	计数排序：分别统计0,1,2的元素个数，然后放回原有数组
+	void sortColors(vector<int>& nums)
+	{
+		//时间复杂度:O(n)
+		//空间复杂度:O(k),k=3,即O(1)
+		int count[3] = {0};
+		for(int i = 0;i < nums.size();i++)
+		{
+			assert(nums[i] >= 0 && nums[i] <= 2);
+			count[nums[i]]++;
+		}
+		int index = 0;
+		for(int i = 0; i < count[0]; i++)
+			nums[index++] = 0;
+		for(int i = 0; i < count[1]; i++)
+			nums[index++] = 1;
+		for(int i = 0; i < count[2]; i++)
+			nums[index++] = 2;
+	}
+	三路快排思想
+	void sortColors(vector<int>& nums)
+	{
+		//只遍历了数组一变
+		int zero = -1;	//nums[0...zero] = 0,所以zero = -1******注意
+		int two = nums.size();		//nums[two...n-1] = 2,所以two = nums.size()******注意
+		for(int i = 0; i < two; )
+		{
+			if(nums[i] == 1)
+				i++;
+			else if(nums[i] == 2)
+				swap(nums[i],nums[--two]);
+			else
+			{
+				assert(nums[i] == 0);
+				swap(nums[++zero],nums[i++]);
+			}
+		}
+	}
+	问题：Merge Sorted Array
+	给定两个有序整形数组nums1,nums2，将nums2的元素归并到num1中
+	问题：Kth Largest Element in an Array
+	在一个整数序列中寻找第k大的元素
+	--如给定数组[3,2,1,5,6,4],k=2，结果为5
+	利用快排partition中，将pivot放置在了其正确的位置上的性质
+3.6	对撞指针Two Sum II
+	给定一个有序整形数组和一个整数target，在其中寻找两个元素，使得其和为target。返回两个数的索引
+	--如numbers=[2,7,11,15],target=9
+	--返回数字2,7的索引1,2(索引从1开始计算)
+	要跟面试官确认
+	--如果没有解怎样？保证有解
+	--如果有多个解怎样？返回任意解
+	1.最直接的思考：暴力解法。双层遍历，O(n^2)
+	暴力解法没有充分利用源数组的性质---有序
+	2.看到有序，首先想到二分搜索
+	O(nlogn)二分解法
+	3.对撞指针法:时间复杂度O(n)，空间复杂度O(1)
+	vector<int> twoSum(vector<int>& numbers, int target)
+	{
+		assert(numbers.size() >= 2);
+		int l = 0,r = numbers.size() - 1;
+		while(l < r)
+		{
+			if(numbers[l] + numbers[r] == target)
+			{
+				int res[2] = {l+1,r+1};
+				return vector<int>(res,res+2);
+			}
+			else if(numbers[l] + numbers[r] < target)
+				l++;
+			else
+				r--;
+		}
+		throw invalid_argument("The input has no solution.");
+	}
+	问题2：Valid Palindrome
+	给定一个字符串，只看其中的数字和字母，忽略大小写，判断这个字符串是否为回文串？
+	"A man,a plan,a canal;Panama"	是回文串
+	对于字符串要注意以下几个问题：
+	--空字符串如何看
+	--字符的定义
+	--大小写问题
+	问题3：Reverse Vowels of a String
+	给定一个字符串，将改字符串中的元音字母翻转
+	--如：给出"hello"，返回"holle"
+	--如：给出"leetcode"，返回"leotcede"
+	--元音不包含y
+	问题4:Container With Most Water
+	给出一个非负整数a1,a2,a3,...,an;每一个整数表示一个竖立在坐标轴x位置的一堵高度为ai的
+	“墙”，选择两堵墙，和x轴构成的容器可以容纳最多的水。
+3.7 滑动窗口Minimun Size Subarray Sum
+	双索引技术Two Pointer
+	问题1：Minimun Size Subarray Sum
+	给定一个整形数组和一个数字s，找到数组中最短的一个连续子数组，使得连续子数组和sum>=s，返回
+	这个最短的连续子数组的返回值
+	--如，给定数组[2,3,1,2,4,3],s=7
+	--答案为[4,3]，返回2
+	确认：
+	--什么叫子数组
+	--如果没有解怎么办？返回0
+	--多个解怎么返回？
+	思路1：暴力解：遍历所有的连续子数组[i,j],计算其和sum,验证sum>=s,时间复杂度O(n^3)
+	思路2：滑动窗口
+	int minSubArrayLen(int s, vector<int>& nums)
+	{
+		时间复杂度:O(n)
+		空间复杂度:O(1)
+		int l=0 , r=-1;	//nums[l...r]为我们的滑动窗口
+		int sum = 0;
+		int res = nums.size() + 1;
+		while( l < nums.size() )
+		{
+			if( r+1 < nums.size() && sum < s )
+				sum += nums[++r];
+			else 
+				sum -= nums[l++];
+			if(sum >= s)
+				res = min(res,r-l+1);
+		}
+		if (res == nums.size() + 1)
+			return 0;
+		return res;
+	}
+3.8	在滑动窗口中做记录
+	问题1：Longest Substring Without Repeating Characters
+	在一个字符串中寻找没有重复字母的最长子串
+	--如"abcabcbb"，则结果为"abc"
+	--如"bbbbb"，则结果为"b"
+	--如"pwwkew"，则结果为"wke"
+	注意：
+	--字符集？只有字幕？数字+字母？ASCII？
+	--大小写是否敏感
+	int lengthOfLongestSubstring(string s)
+	{
+		int freq[256] = {0};
+		int l = 0; r = -1;	//滑动窗口为s[l...r]
+		int res = 0;
+		while( l < s.size() )
+		{
+			if( r+1 < s.size() && freq[s[r+1]] == 0)
+				freq[s[++r]]++;
+			else
+				freq[s[l++]]--;
+			res = max(res , r-l+1);
+		}
+		return res;
+	}
+	问题2：Find All Anagrams in a String
+	问题3：Minimum Window Substring
+
+四、查找问题
+	两类查找问题
+	查找有无
+	--元素'a'是否存在?set;集合
+	查找对应关系(键值对应)
+	--元素'a'出现了几次？map;字典
+	set和map
+	通常语言的标准库中都内置set和map
+	--容器类
+	--屏蔽实现细节
+	--了解语言中标准库里常见容器类的使用
+	常见操作：
+	--insert
+	--find
+	--erase
+	--change(map)
+4.1 set的使用
+	问题1：Intersection of Two Arrays
+	给定两个数组nums,求两个数组的公共元素。
+	--如nums1 = [1,2,2,1],nums2 = [2,2]
+	--结果为[2]
+	--结果中每个元素只能出现一次
+	--出现的顺序可以是任意的
+	vector<int> intersection(vector<int>& nums1, vector<int>& nums2)
+	{
+		set<int> record(nums1.begin(), nums1.end());
+		set<int> resultSet;
+		for(int i = 0;i < nums2.size(); i++)
+			if(record.find(nums2[i]) != record.end())
+				resultSet.insert(nums2[i]);
+		return vector<int>(resultSet.begin(),resultSet.end());
+	}
+4.2	map的使用
+	问题1：Intersection of Two Arrays II
+	给定两个数组nums，求两个数组的交集.
+	--如nums1 = [1,2,2,1],nums2 = [2,2]
+	--结果为[2,2]
+	--出现的顺序可以是任意的
+	vector<int> intersection(vector<int>& nums1, vector<int>& nums2)
+	{
+		map<int,int> record;
+		for(int i = 0; i < nums1.size(); i++)
+			record[nums1[i]]++;
+		
+		vector<int> resultVector;
+		for(int i = 0;i < nums2.size(); i++)
+			if(record.find(nums2[i]) != record.end() && record[nums2[i]] > 0)
+			{
+				resultVector.push_back(nums2[i]);
+				record[nums2[i]]--;
+			}
+		result resultVector;
+	}
+4.3 set和map不同底层实现的区别
+	解决查找问题的一个很好的数据结构：hash表
+	哈希表的缺点是失去了数据的顺序性
+	map和set的底层实现为平衡二叉树
+	unordered_map和unoedered_set的底层实现为哈希表
+	问题1：Valid Anagram
+	问题2：Happy Number
+	问题3：Word Pattern
+	问题4：Isomorphic Strings
+	问题5：Sort Characters By Frequency
