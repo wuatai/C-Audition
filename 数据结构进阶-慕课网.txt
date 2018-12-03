@@ -772,3 +772,134 @@
 	}
 	问题2：Evaluate Reverse Polish Notation
 	问题3：Simplify Path
+6.2 栈和递归的紧密关系
+	问题1：Binary Tree Preorder Traversal
+	问题2：Binary Tree Inorder Traversal
+	问题3：Binary Tree Postorder Traversal
+	利用栈实现递归
+6.3 运用栈模拟递归
+	问题1：Binary Tree Preorder Traversal
+	struct TreeNode{
+		int val;
+		TreeNode *left;
+		TreeNode *right;
+		TreeNode(int x):val(x),left(NULL),right(NULL){}
+	};
+	struct Command{
+		string s;
+		TreeNode* node;
+		Command(string s,TreeNode* node):s(s),node(node){}
+	};
+	vector<int> preorderTraversal(TreeNode* root)
+	{
+		vector<int> res;
+		if(root == NULL)
+			return res;
+		stack<Command> stack;
+		stack.push(Command("go",root));
+		while(!stack.empty()){
+			Command command = satck.top();
+			stack.pop();
+			if(command.s == "print")
+				res.push_back(command.node->val);
+			else
+			{
+				assert(command.s == "go");
+				if(command.node->right)
+					stack.push(Command("go",command.node->right));
+				if(command.node->left)
+					stack.push(Command("go",command.node->left));
+				stack.push(Command("print",command.node));
+			}
+		}
+		return res;
+	}
+	问题2：Flatten Nested List Lterator
+6.4	队列的典型应用
+	问题1：Binary Tree Level Order Traversal
+	对二叉树进行层序遍历
+	vector<vector<int>> levelOrder(TreeNode* root)
+	{
+		vector<vector<int>> res;
+		if(root == NULL)
+			return res;
+		queue< pair<TreeNode*,int> > q;
+		q.push(make_pair(root,0));
+		while(!q.empty())
+		{
+			TreeNode* node = q.front().first;
+			int level = q.front().second;
+			q.pop();
+			
+			if(level == res.size())
+				res.push_back(vector<int>());
+			res[level].push_back(node->val);
+			if(node->left)
+				q.push(make_pair(node->left,level+1));
+			if(node->right)
+				q.push(make_pair(node->right,level+1));
+		}
+	}
+	问题2：Binary Tree Level Order TravelsalII
+	问题3：Binary Tree Zigzag Level Order Traversal
+	问题4：Binary Tree Right Side View
+6.5	BFS和图的最短路径
+	问题1：Perfect Squares
+	给出一个正整数，寻找最少的完全平方数，使他们的和为n
+	--完全平方数:1,4,9,16
+	--12 = 4 + 4 + 4
+	--13 = 4 + 9
+6.6 优先队列
+	优先队列的底层实现：堆
+	使用优先队列解决算法问题
+	C++ : priority_queue
+	priority_queue<int> pq1:默认最大堆
+	priority_queue<int,vector<int>,greater<int>> pq2：最小堆
+	//自定义比较
+	bool myCmp(int a, int b){
+		return a%10 < b%10;
+	}
+	priority_queue<int,vector<int>,dunction<bool(int,int)>> pq3(myCmp);
+6.7 优先队列相关的算法问题
+	问题1：给定一个非空数组，返回前K个出现频率最高的元素。
+	--如给定[1,1,1,2,2,3]
+	--返回[1,2]
+	--注意K的合法性问题
+	思路1：扫描一遍统计频率；排序找到前K个出现频率最高的元素。O(nlogn)
+	思路2：维护一个含有k个元素的优先队列。如果遍历到的元素比队列中的最小频率元素的频率高，
+	则去除队列中最小频率的元素，将新元素入队。最终，队列中剩下的，就是前K个出现频率最高的元素。O(nlogk)
+	vector<int> topKFrequent(vector<int>& nums,int k)
+	{
+		assert(k > 0);
+		//统计每个元素出现的频率
+		unordered_map<int,int> freq;
+		for(int i = 0;i < nums.size();i++)
+			freq[nums[i]]++;
+		assert(k <= freq.size());
+		//扫描freq，维护当前出现频率最高的k个元素(频率，元素)
+		priority_queue< pair<int,int>,vector<pair<int,int>>, greater<pair<int,int>> > pq;
+		for(unordered_map<int,int>::iterator iter = freq.begin();
+			iter != freq.end(); iter++)
+		{
+			if(pq.size() == k)
+			{
+				if(iter->second > pq.top().first)
+				{
+					pq.pop();
+					pq.push(make_pair(iter->second,iter->first));
+				}
+			}
+			else 
+				pq.push(make_pair(iter->second,iter->first));
+		}
+		vector<int> res;
+		while(!pq.empty())
+		{
+			res.push_back(pq.top().second);
+			pq.pop();
+		}
+		return res;
+	}
+	问题2：Merge k Sorted List
+7.1 二叉树天然的递归结构
+	二叉树和递归
