@@ -903,3 +903,109 @@
 	问题2：Merge k Sorted List
 7.1 二叉树天然的递归结构
 	二叉树和递归
+	问题1：Maximum Depth of binary Tree
+	求一颗二叉树的最高深度
+	从根节点到叶子节点的最高深度
+	struct TreeNode{
+		int val;
+		TreeNode* left;
+		TreeNode *right;
+		TreeNode(int x) : val(x) ,left(NULL), right(NULL){}
+	};
+	int maxDepth(TreeNode* root)
+	{
+		if(root == NULL)
+			return 0;
+		int leftMaxDepth = maxDepth(root->left);
+		int rightMaxDepth = maxDepth(root->right);
+		return max(leftMaxDepth,rightMaxDepth) + 1;
+	}
+	问题2：Minimum Depth of Binary Tree
+	从根节点到叶子节点的最短路径长度
+7.2 一个简单的二叉树问题引发的血案
+	问题1：Invert Binary Tree
+	TreeNode* invertTree(TreeNode* root)
+	{
+		if(root == NULL)
+			return NULL;
+		TreeNode temp = root->left;
+		root->left = root->right;
+		root->right = temp;
+		invertTree(root->left);
+		invertTree(root->right);
+		return root;
+	}
+	问题2：Samp Tree
+	问题3：Symmetric Tree
+	问题4：Count Complete Tree Nodes
+	问题5：Balanced binary Tree
+7.3 注意递归的终止条件
+	问题1：Path Sum
+	给出一颗二叉树以及一个数字sum，判断在这可二叉树上是否存在一条从根到叶子的路径，
+	其路径上的所有节点和为sum
+	bool hasPathSum(TreeNode* root, int sum)
+	{
+		if(root == NULL)
+			return false;
+		if(root->left == NULL && root->right == NULL)
+			return sum == root->val;
+		if(hasPathSum(root->left, sum-root->val))
+			return true;
+		if(hasPathSum(root->right,sum - root->val))
+			return true;
+		return false;
+	}
+	问题2：Sum of Left Leaves
+7.4	定义递归问题
+	问题1：Binary Tree Paths
+	给定一颗二叉树，返回所有表示根节点到叶子节点路径的字符串。
+		1
+	  /	  \
+	 2	   3
+	  \
+	   5
+	-如上图结果为["1->2->5","1->3"]
+	vector<string> binaryTreepaths(TreeNode* root)
+	{
+		vector<string> res;
+		if(root == NULL)
+			return res;
+		if(root->left == NULL && root->right == NULL)
+		{
+			res.push_back(to_string(root->val));
+			return res;
+		}
+		vector<string> leftString = binaryTreepaths(root->left);
+		for(int i = 0;i < leftString.size();i++)
+			res.push_back(to_string(root->val) + "->" leftString[i]);
+		vector<string> rightString = binaryTreepaths(root->right);
+		for(int i = 0;i < rightString.size();i++)
+			res.push_back(to_string(root->val) + "->" rightString[i]);
+		return res;
+	}
+	问题2：Path Sum II
+	问题3：Sum Root to Leaf Numbers
+7.5 更复杂的递归逻辑
+	问题1：Path Sum III
+	给出一颗二叉树以及一个数字sum，判断在这可二叉树上存在多少条路径，其路径上的所有节点和为sum
+	int pathSum(TreeNode* root, int sum)
+	{
+		if(root == NULL)
+			return 0;
+		int res = findPath(root,sum);
+		res += pathSum(root->left,sum);
+		res += pathSum(root->right,sum);
+		return res;
+	}
+	//在以node为根节点中，寻找包含node的路径，和为sum
+	int findPath(TreeNode* node,int num)
+	{
+		if(node == NULL)
+			return 0;
+		int res = 0;
+		if(node->val == num)
+			res += 1;
+		res += findPath(node->left,num-node->val);
+		res += findPath(node->right,num-node->val);
+		return res;
+	}
