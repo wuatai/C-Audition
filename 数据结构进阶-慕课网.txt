@@ -397,3 +397,313 @@
 	问题3：Word Pattern
 	问题4：Isomorphic Strings
 	问题5：Sort Characters By Frequency
+4.4	使用查找表的经典问题Two Sum
+	问题1：Two Sum
+	给出一个整形数组。返回这个数组中的两个数字的索引值i和j，使得nums[i]+nums[j]等于一个给定的target值。
+	两个索引不能相等。
+	--如nums = [2,7,11,15],target = 9
+	--返回[0,1]
+	考虑：
+	--索引从0开始计算还是从1开始计算？
+	--没有解怎么办？
+	--有多个解怎么办？保证有唯一解。
+	思路1：暴力解法O(n^2)
+	思路2：排序后，使用双索引对撞O(nlogn)+O(n)=O(nlogn)
+	思路3：查找表（这是个查找问题）。将所有元素放入查找表，之后对于每一个元素a，查找target-a是否存在。
+	vector<int> twoSum(vector<int>& nums, int target)
+	{
+		//时间复杂度:O(n)
+		//空间复杂度:O(n)
+		unorder_map<int,int> record;
+		for(int i = 0; i < nums.size(); i++)
+		{
+			int complement = target - nums[i];
+			if(record.find(complement) != record.end())
+			{
+				int res[2] = {i,record[complement]}
+				return vector<int>(res,res+2);
+			}
+			record[nums[i]] = i;
+		}
+		throw invalid_argument("the input has no solution");
+	}
+	问题2：3Sum
+	给出一个整形数组，寻找其中的所有不同的三元组(a,b,c)，使得a+b+c=0.如nums=[-1,0,1,2,-1,-4]，结果为[[-1,0,1],[-1,-1,2]]
+	问题3：4Sum
+	给出一个整形数组，寻找其中的所有不同的四元组(a,b,c,d)，使得a+b+c+d=0.
+	问题4：3Sum Closest
+	给出一个整形数组，寻找其中的所有不同的三元组(a,b,c)，使得a+b+c的值最接近另一个给定的数字target
+	--如nums = [-1,2,1,-4],target = 1
+4.5	灵活选择键值4Sum II
+	给出四个整形数组A,B,C,D,寻找有多少个i,j,k,l的组合，使得A[i]+B[j]+C[k]+D[l]==0.其中，A,B,C,D中均含有相同的元素
+	个数N，且0<=N<=500.
+	思路1：暴力解发:O(n^4)
+	思路2：将D中的元素放入查找表：O(n^3)
+	思路3：将C+D的每一种可能放入查找表：O(n^2)
+	int fourSumCount(vector<int>& A,vector<int>& B,vector<int>& C,vector<int>& D)
+	{
+		//时间复杂度O(n^2)
+		//空间复杂度O(n^2)
+		assert(A.size() == B.size() && B.size() == C.size() && C.size() == D.size());
+		unordered_map<int,int> record;
+		for(int i = 0; i < C.size(); i++)
+			for(int j = 0; j < D.size();j++)
+				record[C[i]+D[j]]++;
+		int res = 0;
+		for(int i = 0;i < A.size(); i++)
+			for(int j = 0; j < B.size(); j++)
+				if(record.find(0-A[i]-B[j]) != record.end())
+					res += record[0-A[i]-B[j]];
+		return res;
+	}
+	问题2：Group Anagrams
+4.6 灵活选择键值Number of Boomerangs
+	给出一个平面上的n个点，寻找存在多少个由这些点构成的三元组(i,j,k)，使得i,j两点的距离等于i,k两点的距离。
+	其中n最多为500，且所有的点坐标的范围在[-10000,10000]之间。
+	--如[[0,0],[1,0],[2,0]]，则结果为2
+	--两个结果为[[1,0],[0,0],[2,0]]和[[1,0],[2,0],[0,0]]
+	思路1：暴力解法:O(n^3)
+	思路2：map中存距i点的所有距离及点数
+	int numberOfBoomerangs(vector<pair<int,int>>& points)
+	{
+		//时间复杂度O(n^2)
+		//空间复杂度O(n)
+		int res = 0;
+		for(int i = 0; i < points.size(); i++)
+		{
+			unordered_map<int,int> record;
+			for(int j = 0;j < points.size();j++)
+				if(j != i)
+					record[dis(points[i],points[j])]++;
+			for(unordered_map<int,int>::iterator iter = record.begin();iter != record.end(); iter++)
+			{
+				if(iter->second >= 2)
+					res += (iter->second)*(iter->second-1);
+			}
+		}
+		return res;
+	}
+	int dis(const pair<int,int>& pa,const pair<int,int>& pb)
+	{
+		return (pa.first-pb.first)*(pa.first-pb.first)+(pa.second-pb.second)*(pa.second-pb.second);
+	}
+	问题2：Max Points on a Line
+4.7 查找表和滑动窗口
+	问题1：Contains Dumplicate II
+	给出一个整形数组nums和一个整数k，是否存在索引i和j，使得nums[i]==nums[j]且i和j之间的差不超过k
+	思路1：暴力解法:O(n^2)
+	思路2：滑动窗口
+	bool containsNearbyDuplicate(vector<int>& nums, int k)
+	{
+		//时间复杂度:O(n)
+		//空间复杂度:O(k)
+		unordered_set<int> record;
+		for(int i = 0;i < nums.size();i++)
+		{
+			if(record.find(nums[i]) != record.end())
+				return true;
+			record.insert(nums[i]);
+			//保持record中最多有k个元素
+			if(record.size() == k + 1)
+				record.erase(nums[i-k]);
+		}
+		return false;
+	}
+	问题2:Contains Duplicate
+4.8	二分搜索树底层实现的顺序性Contain Duplicate III
+	给出一个整形数组nums，是否存在索引i和j，使得nums[i]和nums[j]之间的差别不超过给定的整数t,
+	且i和j之间的差别不超过给定的整数k
+	思路1：滑动窗口，在l+1...l+k之间，寻找fabs(v-x)<=t的元素，其中v为第l+k+1的元素
+	bool containsNearbyAlmostDuplicate(vector<int>& nums, int k,int t)
+	{
+		//时间复杂度:O(n)
+		//空间复杂度:O(k)
+		set<int> record;
+		for(int i = 0;i < nums.size();i++)
+		{
+			if(record.lower_bound(nums[i]-t) != record.end() && *record.lower_bound(nums[i]-t) <= nums[i]+t)
+				return true;
+			record.insert(nums[i]);
+			//保持record中最多有k个元素
+			if(record.size() == k + 1)
+				record.erase(nums[i-k]);
+		}
+		return false;
+	}
+5.1 链表
+	问题1：在节点间穿针引线Reverse Linked List
+	需要三个指针(pre,cur,next)
+	struct ListNode{
+		int val;
+		ListNode *next;
+		ListNode(int x):val(x),next(NULL){}
+	};
+	ListNode* reverseList(ListNode* head)
+	{
+		时间复杂度O(n)
+		空间复杂度O(1)
+		ListNode* pre = NULL;
+		ListNode* cur = head;
+		while(cur != NULL)
+		{
+			ListNode* next = cur->next;
+			cur->next = pre;
+			pre = cur;
+			cur = next;
+		}
+		return pre;
+	}
+	问题2：Reverse Linked List II
+	翻转一个链表从m到n的元素
+	如对于链表1->2->3->4->5->NULL,m=2,n=4
+	则返回链表1->4->3->2->5->NULL
+	--m和n超过链表范围怎么办？
+	--m>n怎么办？
+5.2 测试你的链表程序
+	ListNode* createLinkedList(int arr[],int n)
+	{
+		if(n == 0)
+			return NULL;
+		ListNode* head = new ListNode(arr[0]);
+		
+		ListNode* curNode = head;
+		for(int i = 1;i < n; i++)
+		{
+			curNode->next = new ListNode(arr[i]);
+			curNode = curNode->next;
+		}
+		return head;
+	}
+	void deleteLinkedList(ListNode* head)
+	{
+		ListNode* curNode = head;
+		while(curNode != NULL)
+		{
+			ListNode* delNode = curNode;
+			curNode = curNode->next;
+			delete delNode;
+		}
+		return;
+	}
+	void printLinkedList(ListNode* head)
+	{
+		ListNode* curNode = head;
+		while(curNode != NULL)
+		{
+			cout << curNode->val << " -> ";
+			curNode = curNode->next;
+		}
+		cout << "NULL" << endl;
+	}
+	问题2.Remove Duplicates from Sorted List
+	问题3.Partition List
+	问题4.Odd Even Linked List
+	问题5.Add Two Numbers
+	问题6.Add Two Numbers II
+5.3 设立链表的虚拟头结点
+	问题1:Remove Linked List Elements
+	在链表中删除值为val的所有节点
+	--如1->2->6->3->4->5->6->NULL
+	--返回1->2->3->4->5->NULL
+	ListNode* removeElements(ListNode* head,int val)
+	{
+		if(head == NULL)
+			return head;
+		while(head != NULL && head->val == val){
+			ListNode* delNode = head;
+			head = delNode->next;
+			delete delNode;
+		}
+		if(head == NULL)
+			return NULL;
+		ListNode* cur = head;
+		while(cur->next != NULL)
+		{
+			if(cur->next->val == val)
+			{
+				ListNode* delNode = cur-next;
+				cur->next = delNode->next;
+				delete delNode;
+			}
+			else
+				cur = cur->next;
+		}
+		return head;
+	}
+	虚拟头结点：
+	ListNode* removeElements(ListNode* head,int val)
+	{
+		ListNode* dummyHead = new ListNode(0);
+		dummyHead->next = head;
+		
+		ListNode* cur = dummyHead;
+		while(cur->next != NULL)
+		{
+			if(cur->next->val == val)
+			{
+				ListNode* delNode = cur-next;
+				cur->next = delNode->next;
+				delete delNode;
+			}
+			else
+				cur = cur->next;
+		}
+		ListNode* retNode = dummyHead->next;
+		delete dummyHead;
+		return retNode;
+	}
+	问题2：Remove Dumplicates from Sorted List II
+	问题3：Merge Two Sorted Lists
+5.4 复杂的穿针引线
+	问题1：Swap Nodes in Pairs
+	给定一个链表，对于每两个相邻的节点，交换其位置。
+	-如：链表为1->2->3->4->NULL
+	-返回:2->1->4->3->NULL
+	-只能对节点进行操作，不能修改节点的值
+	ListNode* swapPairs(ListNode* head)
+	{
+		ListNode* dummyHead = new ListNode(0);
+		dummyHead->next = head;
+		
+		ListNode* p = dummyHead;
+		while(p->next && p->next->next)
+		{
+			ListNode* node1 = p->next;
+			ListNode* node2 = node1->next;
+			ListNode* next = node->next;
+			
+			node2->next = node1;
+			node1->next = next;
+			p->next = node2;
+		}
+		ListNode* retNode = dummyHead->next;
+		delete dummyHead;
+		return retNode;
+	}
+	问题2：Reverse Nodes in k-Group
+	问题3：Insertion Sort List
+	问题4；Sort List,写一个排序算法，用O(nlogn)的时间复杂度为一个链表进行排序（归并排序）
+5.5	不仅仅是穿针引线
+	问题1：Delete Node in a Linked List
+	给定链表中的一个节点，删除该节点
+	void deleteNode(ListNode* node)
+	{
+		if(node == NULL)
+			return;
+		if(node->next == NULL)
+		{
+			delete node;
+			node = NULL;
+		}
+		node->val = node->next->val;
+		ListNode* delNode = node->next;
+		node->next = delNode->next;
+		delete delNode;
+		return;
+	}
+5.6 链表和双指针
+	问题1：Remove Nth Node Form End of List
+	给定一个链表，删除倒数第n个节点
+	-如：1->2->3->4->5->NULL,n=2
+	-返回:1->2->3->5
+	
