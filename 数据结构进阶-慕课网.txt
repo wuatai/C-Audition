@@ -1,3 +1,4 @@
+2.	复杂度分析
 2.2	对数据规模有个概念
 	如果想在1s之内解决问题：
 	O(n^2)可以处理大约10^4
@@ -88,7 +89,7 @@
 		=2^(n-1)-1
 		=O(2^n)
 2.6 均摊时间复杂度分析：vector的resize()需要均摊到每个push_back()操作
-
+3.	数组中的问题其实很常见
 3.1	从二分查找法看如何写出正确的程序
 	***数组中的问题其实最常见***
 	排序：选择排序；插入排序；归并排序；快速排序
@@ -350,6 +351,7 @@
 	--find
 	--erase
 	--change(map)
+4.	查找表的相关问题
 4.1 set的使用
 	问题1：Intersection of Two Arrays
 	给定两个数组nums,求两个数组的公共元素。
@@ -530,6 +532,7 @@
 		}
 		return false;
 	}
+5.	在链表中穿针引线
 5.1 链表
 	问题1：在节点间穿针引线Reverse Linked List
 	需要三个指针(pre,cur,next)
@@ -733,6 +736,7 @@
 	问题2：Rotate List
 	问题3：Reorder List
 	问题4：Palindrome Linked
+6. 	栈，队列，优先队列
 6.1	栈的队列的基础应用
 	问题1：Valid Parenttheses
 	给定一个字符串，只包含(,[,{,),],},判断字符串中的括号匹配是否合法。
@@ -901,6 +905,7 @@
 		return res;
 	}
 	问题2：Merge k Sorted List
+7.	二叉树和递归
 7.1 二叉树天然的递归结构
 	二叉树和递归
 	问题1：Maximum Depth of binary Tree
@@ -1009,3 +1014,27 @@
 		res += findPath(node->right,num-node->val);
 		return res;
 	}
+7.6 二分搜索树中的问题
+	问题1：Lowest Common Ancestor of a Binary Search Tree
+	给定一颗二分搜索树和两个节点，寻找这两个节点的最近公共祖先。
+	--如右图所示二分搜索树
+	--2和8的最近公共祖先为6
+	--2和4的最近公共祖先为2
+	TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p,TreeNode* q)
+	{
+		assert( p != NULL && q != NULL);
+		if(root == NULL)
+			return NULL;
+		if(p->val < root->val && q->val < root->val)
+			return lowestCommonAncestor(root->left,p,q);
+		if(p->val > root->val && q->val > root->val)
+			return lowestCommonAncestor(root->right,p,q);
+		return root;
+	}
+	问题2：Validate Binary Search Tree
+	问题3：delete Node in a BST
+	问题4：Convert Sorted Array to Binary Search Tree
+	问题5：Kth Smallest Element in a BST
+	问题6：Lowest Common Ancestor of a Binary Tree
+8. 递归和回溯
+8.1 树形问题
