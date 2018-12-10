@@ -76,9 +76,85 @@
 
 3.5	TCP链接建立(三次握手)和断开(四次挥手)
 	客户端					服务器
-								LISTEN
-				客户端发SYN
-		SYN_SEND				
-								SYN_RECEIVE
+							LISTEN
+			  客户端发SYN
+	SYN_SEND				
+							SYN_RECEIVED
+			服务端发SYN,ACK
+	ESRABLISHED								
+			  客户端发ACK	
+							ESTABLISHED
+			  客户端发数据
+					
+	
+	发起方					接收方
+	ESTABLISHED				ESTABLISHED
+				发送方发FIN
+	FIN_WAIT_1				
+							CLOSE_WAIT(接收方还没准备好断开)
+				接收方发ACK
+	FIN_WAIT_2
+				接收方发FIN
+							LAST_ACK(等发送方的最后一个ACK)
+	TIME_WAIT
+				发送方发ACK
+							CLOSED
+			  接收方等待一段时间(怕接收方没收到前一个ACK)
+	CLOSED
+	
+常见问题
+1.为什么要三次握手？流程是怎样的？
+2.断开是为什么要四次挥手？流程是怎样的？
+3.断开连接的发起方经历了哪些状态？
+4.为何断开连接发起方最后要进入超时等待TIME_WAIT状态？
+四、数据库
+4.1 数据库概述
+关系型数据库
+1.基于关系代数理论
+2.缺点：表结构不直观，实现复杂，速度慢
+3.优点：健壮性高，社区庞大
 
-		
+4.2	JOIN 和 GROUP BY
+内连接
+SELECT * FROM 'product' p JOIN 'category' c
+ON p.'categoryId' = c.'categoryId'
+GROUP BY p.'categoryId'
+外链接
+SELECT * FROM 'product' p join (
+SELECT p.'categoryId','categoryName',MIN(p.'price') as min_price FROM 'product' p LEFT JOIN 'category' c
+ON p.'categoryId' = c.'categoryId'
+GROUP BY p.'categoryId','categoryName') AS cat_min
+ON p.'categoryId' = cat_min.categoryId
+WHERE p.'price' = cat_min.min_price
+括号里面是子查询
+
+4.3	事务和乐观锁
+事务：要符合ACID特性
+1.Atomicity:原子性
+2.Consistency:一致性
+3.Isolation:独立性，隔离性(关键)
+4.Durability:持久性
+事务的隔离级别
+1.Read uncommitted
+2.Read Committed
+3.Repeatable Reads
+4.Serializable
+事务：
+BEGIN;
+SET AUTOCOMMIT = 0;
+SELECT count FROM 'product' WHERE 'productId' = 2 FOR UPDATE;
+(FOR UPDATE:加锁)
+乐观锁(版本保护)(用于冲突几率多的时候)
+锁太耗费资源，乐观锁以一种逻辑上的实现。
+1.读取数据，记录version
+2.修改数据
+3.检查和提交数据，必须放在一行中
+UPDATE 'product' SET 'count' = 45 WHERE 'productId' = 2 AND 'count' = 46;
+4.4	数据库问题
+1.介绍一下关系型数据库的理论基础？(1-3范式)
+2.给定一个场景，请设计表结构？(要做到3范式)
+3.给定表结构，请按要求写出SQL语句？
+4.什么是事务的ACID属性？食物有哪些隔离级别？
+5.事务的性能太慢怎么办？(用乐观锁)
+4.5 数据库的索引
+建立索引：
