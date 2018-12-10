@@ -1568,3 +1568,245 @@
 	问题1：House Robber II
 	问题2：House Robber III
 	问题3：Best Time to Buy and Sell Stock with Cooldown
+9.5 0-1背包问题
+	有一个背包，它的容量为C(Capacity),现在有n种不同的物品，编号为0...n-1，其中每一件物品的重量为w(i),
+	价值为v(i)。问可以向这个背包中放哪些物品，使得在不超过背包容量的基础上，物品的总价值最大。
+	暴力解法：每一件物品都可以放进背包，也可以不放进背包。O((2^n)*n)
+	贪心算法？优先放入平均价值最高的物品？
+	思路：
+	状态定义F(n,C)：考虑将n个物品放进容量为C的背包，使得价值最大
+	状态转移F(i,c) = F(i-1,c)(第一种情况) = v(i) + F(i-1,c-w(i))(第二种情况),区别是放不放i进背包
+					= max(F(i-1,c),v(i) + F(i-1,c-w(i)))
+	自顶向下，记忆化搜索：
+	class Knapsack01
+	{
+	private:
+		//记忆化空间
+		vector<vector<int>> memo;
+		//用[0...index]的物品，填充容积为c的背包的最大价值
+		int bestValue(const vector<int> &w,const vector<int> &v, int index, int c)
+		{
+			if( index < 0 || c <= 0)
+				return 0;
+			if(memo[index][c] != -1)
+				return memo[index][c];
+				
+			int res = bestValue(w,v,index-1,c);
+			if(c >= w[index])
+				res = max(res,v[index] + bestValue(w,v,index-1,c-w[index]));
+			memo[index][c] = res;
+			return res;
+		}
+	public:
+		int knapsack01(const vector<int> &w,const vector<int> &v, int C)
+		{
+			memo = vector<vector<int>>(n,vector<int>(C+1,-1));
+			int n = w.size();
+			return bestValue(w,v,n-1,C);
+		}
+	};
+	//自底向上，动态规划
+	class Knapsack01
+	{
+	public:
+		int knapsack01(const vector<int> &w,const vector<int> &v, int C)
+		{
+			assert(w.size() == v.size());
+			int n = w.size();
+			if(n == 0)
+				return 0;
+				
+			vector<vector<int>> memo(n,vector<int>(C+1,-1));
+			
+			for(int j = 0;j <= C; j++)
+				memo[0][j] = (j >= w[0] ? v[0] : 0);
+			for(int i = 1; i < n; i++)
+				for(int j = 0; j <= C; j++)
+				{
+					memo[i][j] = memo[i-1][j];
+					if(j >= w[i])
+						memo[i][j] = max(memo[i][j],v[i]+memo[i-1][j-w[i]]);
+ 				}
+			return memo[n-1][C];
+		}
+	};
+9.6	0-1背包问题的优化和变种
+	时间复杂度：O(n*C)
+	空间复杂度：O(n*C)
+	优化只能在空间复杂度上考虑
+	更多变种：
+	1.完全背包问题:每个物品可以无限使用？
+	2.多维费用的背包问题：要考虑物品的体积和重量两个维度？
+	3.物品间假如更多约束
+9.7	面试中的0-1背包问题
+	问题1：Partition Equal Subset Sum
+	给定一个非空数组，其中所有的数字都是正整数。问是否可以将这个数组的元素分成两部分，
+	使得每部分的数字和相等？
+	-如对[1,5,11,5]，可以分成[1,5,5]和[11]两部分，元素和相等，返回true
+	-如对[1,2,3,5]，无法分成元素和相等的两部分，返回false
+	分析：典型的背包问题，在n个物品中选出一定物品，填满sum/2的背包
+	F(n,C)考虑将n个物品填满容量为C的背包
+	F(i,c) = F(i-1,c) || F(i-1,c-w[i])
+	class Solution
+	{
+	private:
+		//memo[i]:-1表示未计算，0不可以填充，1可以填充
+		vector<vector<int>> memo;
+		//使用nums[0...index],是否可以完全填充一个容量为sum的背包
+		bool tryPartition(const vector<int>& nums,int index,int sum)
+		{
+			if(sum == 0)
+				return true;
+				
+			if(sum < 0 || index < 0)
+				return false;
+				
+			if(memo[index][sum] != -1)
+				return memo[index][sum] == 1;
+				
+			memo[index][sum] = tryPartition(nums,index-1,sum) || tryPartition(nums,index-1,sum-nums[index]);
+			
+			return memo[index][sum];
+		}
+	public:
+		bool canPartition(vector<int>& nums)
+		{
+			int sum = 0;
+			for(int i = 0;i < nums.size(); i++)
+			{
+				assert(nums[i] > 0);
+				sum += nums[i];
+			}
+			if(sum%2 != 0)
+				return false;
+			
+			memo = vector<vector<int>>(nums.size(),vector<int>(sum/2+1,-1));
+			
+			return tryPartition(nums,nums.size()-1,sum/2);
+		}
+	};
+	
+	动态规划
+	class Solution
+	{
+	public:
+		bool canPartition(vector<int>& nums)
+		{
+			int sum = 0;
+			for(int i = 0;i < nums.size(); i++)
+			{
+				assert(nums[i] > 0);
+				sum += nums[i];
+			}
+			if(sum%2 != 0)
+				return false;
+			
+			int n = nums.size();
+			int C = sum/2;
+			vector<bool> memo(C+1,false);
+			
+			for(int i = 0;i <= C; i++)
+				memo[i] = (nums[0] == i);
+			for(int i = 1;i < n; i++)
+				for(int j = C; j >= nums[i]; j--)
+					memo[j] = memo[j] || memo[j-nums[i]];
+			
+			return memo[C];
+		}
+	};
+	问题2：Coin Change
+	问题3：Combination Sum IV
+	问题3：Ones and Zeros
+	问题4：Word Break
+	问题5：Target Sum
+9.8	最长上升子序列
+	Lonest Increasing Subsequence
+	给定一个整数序列，求其中的最长上升子序列的长度。
+	-如[10,9,2,5,3,7,101,18]，其最长上升子序列的长度为4.
+	-为[2,5,7,101]
+	
+	状态LIS(i)表示以第i个数字为结尾的最长上升子序列的长度
+	表示[0...i]的范围内，选择数字nums[i]可以获得的最长上升子序列的长度。(i必须用)
+	LIS(i) = max(1+LIS(j) if nums[i] > nums[j])，其中j<i
+	
+	class Solution
+	{
+	public:
+		int lengthOfLIS(vector<int>& nums)
+		{
+			if(nums.size() == 0)
+				return 0;
+			//memo[i]表示以nums[i]为结尾的最长上升子序列的长度
+			vector<int> memo(nums.size(),1);
+			for(int i = 1;i < nums.size(); i++)
+				for(int j = 0;j < i;j++)
+					if(nums[j] < nums[i])
+						memo[i] = max(memo[i],1+memo[j]);
+			int res = 1;
+			for(int i = 0;i < nums.size();i++)
+				res = max(res,memo[i]);
+			return res;
+		}
+	};
+	问题2：Wiggle Subsequence
+9.9	LCS、最短路径，求动态规划的具体解以及更多
+	问题1：最长公共子序列(LCS)
+	给出两个字符串S1和S2，求这两个字符串的最长公共子序列的长度
+	S1=AAACCGTAGTTATTCGTTCTAGAA
+	S2=CACCCCTAAGGTACCTTTGGTTC
+	结果为：ACCTAGTACTTTG
+	S1 = ABCD
+	S2 = AEBD
+	结果为：ABD
+	LCS(m,n):S1[0...m]和S2[0...n]的最长公共子序列的长度
+	考虑：
+	S1[m] == S2[n]:
+	LCS(m,n) = 1 + LCS(m-1,n-1)
+	S1[m] != S2[n]:
+	LCS(m,n) = max(LCS(m-1,n),LCS(m,n-1))
+	从最后面开始计算
+	自己写一下递归+记忆化搜索，动态规划
+	问题2：dijkstra也是动态规划
+	问题3：Logest Increasing Subsequence
+	问题4：解决Leetcode上更多动态规划问题
+10 	贪心算法基础
+10.1 问题1：Assign Cookies
+	假设你想给小朋友们饼干。每个小朋友最多能够给一块儿饼干。每个小朋友都有一个
+	贪心指数，成为g(i)，g(i)表示的是这名小朋友需要的饼干大小的最小值。同时，每个饼干都有
+	一个大小值s(i)。如果s(j)>=g(i)，我们将饼干j分给小朋友i后，小朋友就会很开心。给定数组s和g，
+	问如何分配饼干，能够让最多的小朋友开心。
+	如g=[1,2,3],s=[1,1],结果为1
+	如g=[1,2],s=[1,2,3],结果为2
+	优先使用最大的饼干给最贪心的小朋友
+	*****通常实现贪心算法一般都需要对数组进行排序*****
+	class Solution{
+	public:
+		int findContentChildren(vector<int>& g,vector<int>& s){
+			sort(g.begin(),g.end(),greater<int>());//从大到小排序
+			sort(s.begin(),s.end(),greater<int>());//从大到小排序
+			
+			int si = 0,gi = 0;
+			int res = 0;
+			while(gi < g.size() && si < s.size()){
+				if(s[si] >= g[gi]){
+					res++;
+					si++;
+					gi++;
+				}
+				else{
+					gi++;
+				}
+			}
+			return res;
+		}
+	};
+	问题2：Is Subsequence
+10.2 贪心算法和动态规划的关系
+	问题1：Non-overlapping Intervals
+	给定一组区间，问最少删除多少个区间，可以让这些区间相互不重叠。
+	-如[[1,2],[2,3],[3,4],[1,3]],算法返回1
+	-如[[1,2],[1,2],[1,2]],算法返回2
+10.3 贪心选择性质的证明
+	贪心选择性质：
+	如果无法举出反例，如何证明贪心算法的正确性？如何应用到每个例子中？
+	反证法：
