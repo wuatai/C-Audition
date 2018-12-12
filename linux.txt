@@ -66,3 +66,25 @@ tar -xcvf 打包文件名 -C 解压位置
 1.7	其他常用命令
 挂载命令：
 mount [-t 文件系统] [-o 特殊选项] 设备 文件名 挂载点
+
+二、Shell基础
+1.Shell概述
+Shell是一个命令显示器
+2.脚本执行方式
+	echo 输出命令
+	echo [选项] [输出内容]，-e 可以支持控制字符
+	方式：赋予执行权限，直接运行
+		chmod 755 hello.sh		./hello.sh
+		bash hello.sh
+3.别名与快捷键
+	alias:显示所有别名
+	alias ls='ls --color=auto'，alias [别名] [原命令]
+	unalias:删除别名
+	
+	ctrl+c 强制终止当前命令
+	ctrl+l 清屏
+	ctrl+a 光标移动到命令行首
+	ctrl+e 光标移动到命令行尾
+	ctrl+u 从光标所在位置删除到行首
+	ctrl+z 把命令放到后台
+	ctrl+r 在历史命令中搜索
