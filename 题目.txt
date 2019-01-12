@@ -167,3 +167,113 @@ TCP拥塞控制：滑动窗口（发送方拥塞窗口和接收方拥塞窗口�
 	内连接：配合ON使用求两个表的交集
 	左连接：配合ON使用求两个表的交集，外加左表剩下的数据
 	左连接：配合ON使用求两个表的交集，外加又表剩下的数据
+wangyi:
+1   怎么寻找单链表中环
+快慢指针
+class Solution{
+public:
+	bool hasCycle(ListNode* head)
+	{
+		if(head == NULL)
+			return false;
+		ListNode* p1 = head;
+		ListNode* p2 = head;
+		while(p1->next && p2->next && p2->next->next)
+		{
+			p1 = p1->next;
+			p2 = p2->next->next;
+			if(p1 == p2)
+				return true;
+		}
+		return false;
+	}
+};
+2   tcp和udp区别
+一、TCP面向连接，UDP无连接
+二、TCP可靠，包括三次握手，拥塞控制，流量控制，出错重传等，UDP不可靠
+三、TCP相对UDP漏洞多一些，容易被攻击
+四、TCP效率比UDP低，因为TCP有很多额外处理
+五、应用场合，TCP适合对数据准确要求高，UDP适合对实时性要求高的场景
+3   c  c++区别
+一、C是面向过程的，C++是面向对象的
+二、C++是C的增强，增加了面向对象机制，泛型编程，异常处理，模板库，命名空间等
+4   什么是拷贝构造，什么时候用
+答：拷贝构造函数是一种特殊的构造函数，函数名称和类一致，唯一一个参数是本类型的一个引用变量。
+	一、新建一个对象，并用同类对象进行初始化时调用
+	二、函数参数是类的对象时，调用该函数时调用
+	三、函数返回值是类的对象时，函数调用完毕需要将对象复制给一个临时变量，此时调用。
+	总之，在用一个类对象复制给一个新的对象时调用。
+5   什么是虚拟内存，怎么实现
+
+6   各类排序算法复杂度
+冒泡，插入，选择，N^2
+快排，归并，堆排序，NlogN
+7   malloc free new  delete  区别
+一、new能自动计算分配的内存空间，malloc需要手动
+二、new和delete带具体类型的指针，malloc和free返回void指针
+三、new能调用构造函数，malloc不能，delete能调用析构函数，free不能
+四、new/delete是操作符，而malloc/free是库函数，需要stdlib.h支持
+8 new的内部怎么实现
+一、简单数据类型
+	直接通过operator new分配内存
+	失败的时候不像malloc返回NULL，而是抛出异常。
+二、复杂数据类型
+	先调用operator new，然后在分配的内存上调用构造函数。
+9 早绑定和晚绑定各自的优势
+早绑定：编译效率，代码提示，编译时类型检查
+万绑定：不用声明类型，对象类型可以随时更改，多态
+10 什么是死锁，条件是什么
+答。死锁的原因：系统资源不足，进程运行推进的顺序不合适，资源分配不当等
+	死锁的四个必要条件：
+	1.互斥条件：每个资源要么已经分配给了一个进程，要么就是可用的
+	2.占有和等待条件：已经得到了某个资源的进程可以请求新的资源
+	3.不可抢占条件：已经分配出去的资源不能被强制性的抢占，只能自己显式释放
+	4.环路等待条件：存在多个进程组成环路，每个进程都在等待下一个进程所占有的资源
+11 多个线程同时创建单例，该怎么避免冲突
+metux mu;
+class SingleTon
+{
+private:
+	SingleTon();
+	static SingleTon* testPtr; 
+public:
+	static ClassTest* getInstance()
+	{
+		if(NULL == testPtr)
+		{
+			mu.lock();
+			if(NULL == testPtr)
+			{
+				testPtr = new SingleTon();
+			}
+			mu.unlock();
+		}
+		return testPtr;
+	}
+};
+SingleTon* SingleTon::testPtr = NULL;
+
+12 什么是拓扑排序，主要用于什么
+是对有向无环图的定点的一种排序，他使得如果存在一条从A到B的路径，name在排序中B出现在A的后面
+实现：
+一、从有向图中选取一个没有前驱的定点，并输出
+二、从有向图中删除此定点以及所有以它为尾的弧
+三、重复上述两步
+13 vector和list内部实现  插入和删除的时间复杂度
+vector是数组，list是双向链表
+随机存取：vector是O(1)，list是O(n)
+插入：vector是O(n)，list是O(1)
+删除：vector是O(n),list是O(1)
+14 最短路径算法
+
+15 share_ptr用法
+
+16 vector怎么扩展内存
+
+17 深度优先搜索和广度优先搜索
+
+18 类中的默认函数
+
+19 多态的具体实现
+
+20 动态链接和静态链接区别
