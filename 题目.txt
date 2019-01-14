@@ -265,7 +265,7 @@ vector是数组，list是双向链表
 插入：vector是O(n)，list是O(1)
 删除：vector是O(n),list是O(1)
 14 最短路径算法
-
+dijkstrahe与floyd算法
 15 share_ptr用法
 
 16 vector怎么扩展内存
